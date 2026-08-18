@@ -6,21 +6,21 @@
 // Tämän jälkeen käyttäjän omat muutokset tallentuvat muistiin.
 const DEFAULT_PLAN = {
   A: {
-    name: 'Treeni A — Push + jalat',
+    name: 'Treeni A — Yläkroppa (työntö) + Etujalat',
     exercises: [
-      { id: 'bench', name: 'Penkkipunnerrus', sets: 5, reps: '5', weight: 90, unit: 'kg', note: 'Pääliike — tärkein' },
-      { id: 'lat', name: 'Ylätalja leveä ote', sets: 4, reps: '8–10', weight: 70, unit: 'kg', note: '' },
-      { id: 'bsq', name: 'Bulgarian split-kyykky', sets: 3, reps: '10', weight: 0, unit: 'kg', note: 'Selkäystävällinen vaihtoehto kyykylle' },
-      { id: 'dip', name: 'Dippi', sets: 3, reps: 'maks', weight: 0, unit: 'kg', note: 'Kehon paino' },
+      { id: 'bench', name: 'Penkkipunnerrus', sets: 3, reps: '5–8', weight: 90, unit: 'kg', note: 'Pääliike voimalle' },
+      { id: 'lat', name: 'Ylätalja / Leuanveto', sets: 3, reps: '8–10', weight: 70, unit: 'kg', note: 'Yläselkä vastapainoksi' },
+      { id: 'bsq', name: 'Bulgarialainen split-kyykky', sets: 3, reps: '8–10/jalka', weight: 0, unit: 'kg', note: 'Etureidet & tasapaino — selkäystävällinen' },
+      { id: 'tri', name: 'Ojentajapunnerrus taljassa', sets: 2, reps: '10–12', weight: 25, unit: 'kg', note: 'Penkin avuksi (dipin sijaan, säästää olkapäitä)' },
     ]
   },
   B: {
-    name: 'Treeni B — Pull + yläkroppa',
+    name: 'Treeni B — Yläkroppa (veto) + Takajalat',
     exercises: [
-      { id: 'row', name: 'Kulmasoutu', sets: 4, reps: '8', weight: 70, unit: 'kg', note: '' },
-      { id: 'rdl', name: 'Rumanian maastaveto', sets: 3, reps: '10', weight: 60, unit: 'kg', note: 'Pidä selkä suorana koko ajan' },
-      { id: 'ohp', name: 'Hartiaprässi', sets: 4, reps: '8', weight: 50, unit: 'kg', note: '' },
-      { id: 'curl', name: 'Hauiskääntö', sets: 3, reps: '10–12', weight: 20, unit: 'kg', note: 'Käsipainot' },
+      { id: 'hip', name: 'Lantionnosto', sets: 3, reps: '10–12', weight: 40, unit: 'kg', note: 'Pakarat & takareidet — selkäystävällinen (selkä tuettuna)' },
+      { id: 'row', name: 'Kulmasoutu', sets: 3, reps: '8–10', weight: 70, unit: 'kg', note: 'Keskiselkä & penkin tukilihakset' },
+      { id: 'ohp', name: 'Hartiaprässi istuen (selkätuki)', sets: 2, reps: '10–12', weight: 40, unit: 'kg', note: 'Olkapäät — selkä tuettuna' },
+      { id: 'curl', name: 'Hauiskääntö', sets: 2, reps: '10–12', weight: 20, unit: 'kg', note: 'Käsivarren tasapaino' },
     ]
   }
 };
@@ -43,23 +43,21 @@ const EXERCISE_LIBRARY = {
     { name: 'Leuanveto', note: 'Kehon paino' },
   ],
   'Jalat (selkäystävällinen)': [
-    { name: 'Bulgarian split-kyykky', note: 'Selkäystävällinen' },
+    { name: 'Lantionnosto', note: 'Selkäystävällinen — pakarat & takareidet' },
+    { name: 'Bulgarialainen split-kyykky', note: 'Selkäystävällinen' },
     { name: 'Askelkyykky', note: 'Selkäystävällinen' },
     { name: 'Jalkaprässi', note: 'Selkä tuettuna' },
     { name: 'Reiden ojennus (laite)', note: 'Polviystävällinen kevyellä' },
-    { name: 'Reiden koukistus (laite)', note: 'Selkäystävällinen' },
-    { name: 'Lantionnosto', note: 'Selkäystävällinen' },
+    { name: 'Reiden koukistus (laite)', note: 'Selkäystävällinen — takareidet' },
   ],
-  'Jalat (perus)': [
+  'Jalat (varo selkää)': [
     { name: 'Kyykky', note: 'Varo selkää' },
-    { name: 'Rumanian maastaveto', note: 'Pidä selkä suorana' },
-    { name: 'Maastaveto', note: 'Varo selkää' },
     { name: 'Pohjenousu', note: '' },
   ],
   'Olkapäät': [
-    { name: 'Hartiaprässi', note: '' },
-    { name: 'Käsipainohartiaprässi', note: '' },
-    { name: 'Vipunosto sivulle', note: '' },
+    { name: 'Hartiaprässi istuen (selkätuki)', note: 'Selkäystävällinen' },
+    { name: 'Käsipainohartiaprässi istuen', note: 'Selkäystävällinen' },
+    { name: 'Vipunosto sivulle', note: 'Kevyt olkakuorma' },
     { name: 'Vipunosto eteen', note: '' },
   ],
   'Kädet': [
@@ -80,9 +78,10 @@ const EXERCISE_LIBRARY = {
 const PROFILE = `
 Käyttäjä: JJ
 Tavoitteet: lihasmassan kasvu, voiman lisääminen, terveyden ylläpito
-Rajoitteet: selkävaurio — kyykky ja maastaveto vain sovellettuina vaihtoehtoliikkeinä (esim. Bulgarian split-kyykky, Rumanian maastaveto kevyellä kuormalla)
-Treenifrekvenssi: 2–3 kertaa viikossa
-Treenijako: A (Push + jalat sovellettu) ja B (Pull + yläkroppa) vuorotellen
+Rajoitteet: selkävaurio JA olkapäät säästettävä. ÄLÄ suosittele tavallista maastavetoa, suorin jaloin maastavetoa (RDL) äläkä seisten tehtävää pystypunnerrusta. Turvalliset vaihtoehdot: lantionnosto (selkä tuettuna), Bulgarialainen split-kyykky, hartiaprässi istuen selkätuella.
+Treenifrekvenssi: 2 kertaa viikossa (realistinen tavoite)
+Treenijako: A (Yläkroppa työntö + Etujalat) ja B (Yläkroppa veto + Takajalat) vuorotellen
+RPE: käyttäjä voi kirjata jokaiselle liikkeelle RPE-arvon (1–10, koettu kuormittavuus). Käytä sitä progression suunnitteluun kun se on annettu.
 Kieli: suomi
 `;
 
@@ -407,6 +406,15 @@ function openLogModal() {
   form.innerHTML = '';
   form.dataset.workout = nextWorkout;
 
+  // RPE-selitys lomakkeen alkuun
+  const rpeInfo = document.createElement('div');
+  rpeInfo.className = 'rpe-info';
+  rpeInfo.innerHTML = `
+    <strong>Vinkki — mikä on RPE?</strong> RPE tarkoittaa kuinka raskaalta sarja tuntui (1–10).
+    <br>RPE 10 = et olisi jaksanut yhtään lisätoistoa. RPE 8 = kaksi toistoa olisi jäänyt varaan. RPE-kenttä on vapaaehtoinen, mutta se auttaa valmentajaa suunnittelemaan progression tarkemmin.
+  `;
+  form.appendChild(rpeInfo);
+
   plan.exercises.forEach(ex => {
     const lastSession = [...sessions].reverse().find(s =>
       s.exercises && s.exercises.some(e => e.id === ex.id)
@@ -431,6 +439,10 @@ function openLogModal() {
         <div class="log-field">
           <label>Paino (kg)</label>
           <input type="number" id="weight-${ex.id}" value="${suggestedWeight}" min="0" max="500" step="0.5" />
+        </div>
+        <div class="log-field">
+          <label>RPE (1–10)</label>
+          <input type="number" id="rpe-${ex.id}" placeholder="?" min="1" max="10" step="0.5" />
         </div>
       </div>
       <div class="log-notes">
@@ -461,6 +473,7 @@ async function submitLog() {
     completedReps: parseInt(document.getElementById('reps-' + ex.id)?.value) || 0,
     targetReps: ex.sets,
     actualWeight: parseFloat(document.getElementById('weight-' + ex.id)?.value) || 0,
+    rpe: parseFloat(document.getElementById('rpe-' + ex.id)?.value) || null,
     note: document.getElementById('note-' + ex.id)?.value || '',
   }));
 
@@ -494,7 +507,7 @@ async function analyzeSession(session, allSessions) {
 
   const historyText = allSessions.slice(-10).map(s => {
     const exText = s.exercises.map(e =>
-      `${e.name}: ${e.actualSets}×${e.completedReps} @ ${e.actualWeight}kg${e.note ? ' (' + e.note + ')' : ''}`
+      `${e.name}: ${e.actualSets}×${e.completedReps} @ ${e.actualWeight}kg${e.rpe ? ' RPE' + e.rpe : ''}${e.note ? ' (' + e.note + ')' : ''}`
     ).join(', ');
     return `${s.date} (${s.workout}): ${exText}`;
   }).join('\n');
@@ -504,17 +517,23 @@ Olet kokenut personal trainer ja voimavalmentaja. Analysoi alla oleva treenikirj
 
 ${PROFILE}
 
-Treenien historia (viimeiset 10):
+Treenien historia (viimeiset 10 — käytä tätä pidemmän aikavälin trendin arviointiin):
 ${historyText}
 
 Tänään kirjattu treeni (${session.workout}):
-${session.exercises.map(e => `- ${e.name}: ${e.actualSets}×${e.completedReps} @ ${e.actualWeight}kg${e.note ? ' · huomio: ' + e.note : ''}`).join('\n')}
+${session.exercises.map(e => `- ${e.name}: ${e.actualSets}×${e.completedReps} @ ${e.actualWeight}kg${e.rpe ? ' · RPE ' + e.rpe : ''}${e.note ? ' · huomio: ' + e.note : ''}`).join('\n')}
 
 Anna:
 1. Lyhyt arvio treenistä (1–2 lausetta)
 2. Konkreettiset suositukset jokaiselle liikkeelle ensi kerralle (paino, sarjat, toistot)
-3. Yksi tärkeä huomio (progressio, palautuminen, tekniikka tms.)
+3. Yksi tärkeä huomio pidemmästä kehityksestä (progressio, mahdollinen juuttuminen, palautuminen tai tarve kevyemmälle viikolle)
 
+Käytä RPE-arvoja jos ne on annettu:
+- RPE 6–7 (jäi paljon varaa) → suosittele reilumpaa painonnostoa
+- RPE 8–8.5 (ihanteellinen kuormitus) → jatka maltillista progressiota (+2.5 kg)
+- RPE 9–10 (lähellä maksimia) → pidä paino samana tai nosta vain jos tekniikka pysyy hyvänä; varo ylikuormitusta
+
+Muista käyttäjän selkä- ja olkapäärajoitteet — älä suosittele tavallista maastavetoa tai pystypunnerrusta.
 Ole täsmällinen ja käytännöllinen. Vastaa suomeksi. Pidä vastaus lyhyenä.
 `;
 
@@ -567,7 +586,7 @@ ${plan[nextWorkout].exercises.map((e, i) => `${i + 1}. ${e.name} (${e.sets}×${e
 `;
 
   const historyText = sessions.slice(-5).map(s =>
-    `${s.date}: ${s.exercises.map(e => `${e.name} ${e.actualWeight}kg`).join(', ')}`
+    `${s.date}: ${s.exercises.map(e => `${e.name} ${e.actualWeight}kg${e.rpe ? ' RPE' + e.rpe : ''}`).join(', ')}`
   ).join('\n');
 
   showLoading('Valmentaja miettii...');
