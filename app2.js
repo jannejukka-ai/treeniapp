@@ -215,13 +215,21 @@ function renderExerciseList(workoutKey, plan, sessions) {
     let detailText = ex.sets + ' × ' + ex.reps;
     if (ex.weight > 0) detailText += ' @ ' + ex.weight + ' ' + ex.unit;
 
-    if (lastEx && lastEx.actualWeight) {
-      const suggestion = suggestNextWeight(ex.id, lastEx);
-      if (suggestion > lastEx.actualWeight) {
-        detailText = ex.sets + ' × ' + ex.reps + ' @ ' + suggestion + ' kg';
-        badgeHtml = '<span class="badge badge-up">+' + (suggestion - lastEx.actualWeight).toFixed(1) + ' kg</span>';
+    // Hae edellisen kerran raskain sarjapaino (uusi sarjaformaatti tai vanha)
+    let lastMaxWeight = null;
+    if (lastEx && lastEx.sets && lastEx.sets.length > 0) {
+      lastMaxWeight = Math.max(...lastEx.sets.map(s => s.weight || 0));
+    } else if (lastEx && lastEx.actualWeight) {
+      lastMaxWeight = lastEx.actualWeight; // vanha data
+    }
+
+    if (lastMaxWeight && lastMaxWeight > 0) {
+      const suggestion = suggestNextWeight(ex.id, lastEx, lastMaxWeight);
+      if (suggestion > lastMaxWeight) {
+        detailText = ex.reps + ' @ ' + suggestion + ' kg';
+        badgeHtml = '<span class="badge badge-up">+' + (suggestion - lastMaxWeight).toFixed(1) + ' kg</span>';
       } else {
-        detailText = ex.sets + ' × ' + ex.reps + ' @ ' + lastEx.actualWeight + ' kg';
+        detailText = ex.reps + ' @ ' + lastMaxWeight + ' kg';
         badgeHtml = '<span class="badge badge-done">Sama</span>';
       }
     } else if (i === 0) {
@@ -251,17 +259,39 @@ function renderExerciseList(workoutKey, plan, sessions) {
   list.appendChild(addRow);
 }
 
-function suggestNextWeight(exerciseId, lastEx) {
-  if (!lastEx || !lastEx.actualWeight) return 0;
-  const w = parseFloat(lastEx.actualWeight);
+function suggestNextWeight(exerciseId, lastEx, baseWeight) {
+  const w = parseFloat(baseWeight) || 0;
+  if (w === 0) return 0;
   // Aikaperustaiset core-liikkeet (lankku ym.): ei automaattista painonlisäystä
   const timeBased = ['plank', 'splank'];
   if (timeBased.includes(exerciseId)) return w;
   if (exerciseId === 'bench') return w + 2.5;
-  if (lastEx.completedReps && lastEx.targetReps && lastEx.completedReps >= lastEx.targetReps) {
-    return w + 2.5;
-  }
-  return w;
+  return w + 2.5;
+}
+
+// Tunnista sarjojen suunta: nouseva, laskeva vai tasainen
+function analyzeSetDirection(sets) {
+  if (!sets || sets.length < 2) return 'yksittäinen';
+  const weights = sets.map(s => s.weight || 0);
+  const first = weights[0];
+  const last = weights[weights.length - 1];
+  const max = Math.max(...weights);
+  const min = Math.min(...weights);
+
+  if (max === min) return 'tasainen';
+  if (last > first) return 'nouseva';
+  if (last < first) return 'laskeva';
+  return 'vaihteleva';
+}
+
+// Muotoile sarjat luettavaan muotoon (esim. "80×5, 90×5, 92.5×5")
+function formatSets(sets) {
+  if (!sets || sets.length === 0) return '—';
+  return sets.map(s => {
+    let str = (s.weight || 0) + '×' + (s.reps || 0);
+    if (s.rpe) str += ' (RPE' + s.rpe + ')';
+    return str;
+  }).join(', ');
 }
 
 // ============================================================
@@ -421,7 +451,7 @@ function openLogModal() {
   rpeInfo.className = 'rpe-info';
   rpeInfo.innerHTML = `
     <strong>Vinkki — mikä on RPE?</strong> RPE tarkoittaa kuinka raskaalta sarja tuntui (1–10).
-    <br>RPE 10 = et olisi jaksanut yhtään lisätoistoa. RPE 8 = kaksi toistoa olisi jäänyt varaan. RPE-kenttä on vapaaehtoinen, mutta se auttaa valmentajaa suunnittelemaan progression tarkemmin.
+    <br>RPE 10 = et olisi jaksanut yhtään lisätoistoa. RPE 8 = kaksi toistoa olisi jäänyt varaan. Voit kirjata jokaiselle sarjalle oman painon, toistot ja RPE:n. Kaikki kentät ovat vapaaehtoisia.
   `;
   form.appendChild(rpeInfo);
 
@@ -430,40 +460,99 @@ function openLogModal() {
       s.exercises && s.exercises.some(e => e.id === ex.id)
     );
     const lastEx = lastSession ? lastSession.exercises.find(e => e.id === ex.id) : null;
-    const suggestedWeight = lastEx ? suggestNextWeight(ex.id, lastEx) : ex.weight;
+
+    // Ehdotettu aloituspaino: raskain sarja viime kerralta, tai ohjelman oletus
+    let suggestedWeight = ex.weight;
+    if (lastEx && lastEx.sets && lastEx.sets.length > 0) {
+      const weights = lastEx.sets.map(s => s.weight || 0);
+      suggestedWeight = suggestNextWeight(ex.id, lastEx, Math.max(...weights));
+    } else if (lastEx && lastEx.actualWeight) {
+      // vanha dataformaatti (ennen sarjakohtaisuutta)
+      suggestedWeight = suggestNextWeight(ex.id, lastEx, lastEx.actualWeight);
+    }
+
+    // Montako sarjaa aloituksena: ohjelman määrä (tai viime kerran määrä)
+    const startSetCount = lastEx && lastEx.sets ? lastEx.sets.length : ex.sets;
 
     const div = document.createElement('div');
     div.className = 'log-exercise';
+    div.dataset.exId = ex.id;
+    div.dataset.exName = ex.name;
+    div.dataset.suggestedWeight = suggestedWeight;
+    div.dataset.targetReps = ex.reps;
+
     div.innerHTML = `
       <div class="log-ex-name">${ex.name}</div>
-      <div class="log-ex-target">Tavoite: ${ex.sets} × ${ex.reps}${ex.weight > 0 ? ' @ ' + suggestedWeight + ' kg' : ''}</div>
-      <div class="log-fields">
-        <div class="log-field">
-          <label>Sarjat</label>
-          <input type="number" id="sets-${ex.id}" value="${ex.sets}" min="1" max="10" />
-        </div>
-        <div class="log-field">
-          <label>Toistot</label>
-          <input type="number" id="reps-${ex.id}" value="${ex.sets}" min="1" max="30" />
-        </div>
-        <div class="log-field">
-          <label>Paino (kg)</label>
-          <input type="number" id="weight-${ex.id}" value="${suggestedWeight}" min="0" max="500" step="0.5" />
-        </div>
-        <div class="log-field">
-          <label>RPE (1–10)</label>
-          <input type="number" id="rpe-${ex.id}" placeholder="?" min="1" max="10" step="0.5" />
-        </div>
+      <div class="log-ex-target">Tavoite: ${ex.reps}${ex.weight > 0 ? ' @ ' + suggestedWeight + ' kg (raskain sarja)' : ''}</div>
+      <div class="sets-header">
+        <span class="sets-col-label">Sarja</span>
+        <span class="sets-col-label">Toistot</span>
+        <span class="sets-col-label">Paino (kg)</span>
+        <span class="sets-col-label">RPE</span>
+      </div>
+      <div class="sets-container" id="sets-${ex.id}"></div>
+      <div class="sets-buttons">
+        <button type="button" class="set-btn-add" onclick="addSetRow('${ex.id}')">+ Lisää sarja</button>
+        <button type="button" class="set-btn-remove" onclick="removeSetRow('${ex.id}')">− Poista sarja</button>
       </div>
       <div class="log-notes">
-        <label>Huomioita (valinnainen)</label>
+        <label>Huomioita koko liikkeestä (valinnainen)</label>
         <input type="text" id="note-${ex.id}" placeholder="Esim. tekniikka hyvä, selkä kipeä..." />
       </div>
     `;
     form.appendChild(div);
+
+    // Luo sarjarivit
+    const container = div.querySelector('#sets-' + ex.id);
+    const defaultReps = parseInt(ex.reps) || 8; // esitäytetään toistot ohjelman mukaan
+    for (let i = 0; i < startSetCount; i++) {
+      const prevSet = lastEx && lastEx.sets && lastEx.sets[i] ? lastEx.sets[i] : null;
+      const setWeight = prevSet ? prevSet.weight : suggestedWeight;
+      addSetRow(ex.id, defaultReps, setWeight);
+    }
   });
 
   document.getElementById('log-modal').style.display = 'flex';
+}
+
+// Lisää yksi sarjarivi liikkeelle
+function addSetRow(exId, prefillReps, prefillWeight) {
+  const container = document.getElementById('sets-' + exId);
+  if (!container) return;
+
+  const setNum = container.children.length + 1;
+  const row = document.createElement('div');
+  row.className = 'set-row';
+
+  // Esitäyttö: käytä annettuja arvoja, tai kopioi edellisestä sarjasta
+  let repsVal = prefillReps !== undefined ? prefillReps : '';
+  let weightVal = prefillWeight !== undefined ? prefillWeight : '';
+
+  // Jos ei annettu arvoja, kopioi edellisen sarjan arvot (nopeuttaa täyttöä)
+  if (prefillReps === undefined && container.children.length > 0) {
+    const lastRow = container.children[container.children.length - 1];
+    repsVal = lastRow.querySelector('.set-reps').value || '';
+    weightVal = lastRow.querySelector('.set-weight').value || '';
+  }
+
+  row.innerHTML = `
+    <span class="set-num">${setNum}.</span>
+    <input type="number" class="set-reps" value="${repsVal}" min="1" max="50" placeholder="—" />
+    <input type="number" class="set-weight" value="${weightVal}" min="0" max="500" step="0.5" placeholder="—" />
+    <input type="number" class="set-rpe" min="1" max="10" step="0.5" placeholder="?" />
+  `;
+  container.appendChild(row);
+}
+
+// Poista viimeinen sarjarivi
+function removeSetRow(exId) {
+  const container = document.getElementById('sets-' + exId);
+  if (!container) return;
+  if (container.children.length <= 1) {
+    alert('Liikkeessä pitää olla vähintään yksi sarja.');
+    return;
+  }
+  container.removeChild(container.lastChild);
 }
 
 function closeLogModal() {
@@ -473,19 +562,30 @@ function closeLogModal() {
 async function submitLog() {
   const form = document.getElementById('log-form');
   const nextWorkout = form.dataset.workout;
-  const plan = getPlan()[nextWorkout];
   const today = new Date().toISOString().split('T')[0];
 
-  const loggedExercises = plan.exercises.map(ex => ({
-    id: ex.id,
-    name: ex.name,
-    actualSets: parseInt(document.getElementById('sets-' + ex.id)?.value) || ex.sets,
-    completedReps: parseInt(document.getElementById('reps-' + ex.id)?.value) || 0,
-    targetReps: ex.sets,
-    actualWeight: parseFloat(document.getElementById('weight-' + ex.id)?.value) || 0,
-    rpe: parseFloat(document.getElementById('rpe-' + ex.id)?.value) || null,
-    note: document.getElementById('note-' + ex.id)?.value || '',
-  }));
+  const loggedExercises = [];
+  form.querySelectorAll('.log-exercise').forEach(exDiv => {
+    const exId = exDiv.dataset.exId;
+    const exName = exDiv.dataset.exName;
+    const container = exDiv.querySelector('#sets-' + exId);
+
+    const sets = [];
+    container.querySelectorAll('.set-row').forEach(row => {
+      sets.push({
+        reps: parseInt(row.querySelector('.set-reps').value) || 0,
+        weight: parseFloat(row.querySelector('.set-weight').value) || 0,
+        rpe: parseFloat(row.querySelector('.set-rpe').value) || null,
+      });
+    });
+
+    loggedExercises.push({
+      id: exId,
+      name: exName,
+      sets: sets,
+      note: document.getElementById('note-' + exId)?.value || '',
+    });
+  });
 
   const session = {
     date: today,
@@ -516,10 +616,21 @@ async function analyzeSession(session, allSessions) {
   showLoading('AI-valmentaja analysoi treeniä...');
 
   const historyText = allSessions.slice(-10).map(s => {
-    const exText = s.exercises.map(e =>
-      `${e.name}: ${e.actualSets}×${e.completedReps} @ ${e.actualWeight}kg${e.rpe ? ' RPE' + e.rpe : ''}${e.note ? ' (' + e.note + ')' : ''}`
-    ).join(', ');
+    const exText = s.exercises.map(e => {
+      // Uusi sarjaformaatti tai vanha
+      if (e.sets && e.sets.length > 0) {
+        return `${e.name}: ${formatSets(e.sets)} [${analyzeSetDirection(e.sets)}]${e.note ? ' (' + e.note + ')' : ''}`;
+      }
+      return `${e.name}: ${e.actualWeight || 0}kg${e.rpe ? ' RPE' + e.rpe : ''}${e.note ? ' (' + e.note + ')' : ''}`;
+    }).join('; ');
     return `${s.date} (${s.workout}): ${exText}`;
+  }).join('\n');
+
+  const todayText = session.exercises.map(e => {
+    if (e.sets && e.sets.length > 0) {
+      return `- ${e.name}: ${formatSets(e.sets)} · sarjojen suunta: ${analyzeSetDirection(e.sets)}${e.note ? ' · huomio: ' + e.note : ''}`;
+    }
+    return `- ${e.name}: ${e.actualWeight || 0}kg${e.note ? ' · huomio: ' + e.note : ''}`;
   }).join('\n');
 
   const prompt = `
@@ -531,11 +642,18 @@ Treenien historia (viimeiset 10 — käytä tätä pidemmän aikavälin trendin 
 ${historyText}
 
 Tänään kirjattu treeni (${session.workout}):
-${session.exercises.map(e => `- ${e.name}: ${e.actualSets}×${e.completedReps} @ ${e.actualWeight}kg${e.rpe ? ' · RPE ' + e.rpe : ''}${e.note ? ' · huomio: ' + e.note : ''}`).join('\n')}
+${todayText}
+
+Sarjat on merkitty muodossa paino×toistot, esim. "80×5, 90×5, 92.5×5". Jokaisella sarjalla voi olla eri paino.
+
+TÄRKEÄÄ — tulkitse sarjojen suunta:
+- NOUSEVA (paino kasvaa sarjoittain, esim. 80→90→92.5): käyttäjä aloitti varovasti ja hänellä oli varaa. Perusta seuraavan kerran suositus RASKAIMPAAN sarjaan, ja voit ehdottaa reipasta etenemistä.
+- LASKEVA (paino laskee sarjoittain, esim. 92.5→90→85): TÄRKEÄ SIGNAALI väsymisestä — käyttäjä ei jaksanut pitää painoa yllä. ÄLÄ tuijota raskainta sarjaa. Huomioi tämä merkittävänä: kokonaiskuormitus oli ehkä liian kova. Suosittele saman painon vakiinnuttamista tai maltillisempaa etenemistä, ja mainitse tämä huomiona.
+- TASAINEN (sama paino kaikissa): vakaa, hallittu suoritus. Hyvä pohja progressiiviselle nostolle (+2.5 kg jos RPE sallii).
 
 Anna:
-1. Lyhyt arvio treenistä (1–2 lausetta)
-2. Konkreettiset suositukset jokaiselle liikkeelle ensi kerralle (paino, sarjat, toistot)
+1. Lyhyt arvio treenistä (1–2 lausetta) — kommentoi sarjojen suuntaa jos se on merkittävä
+2. Konkreettiset suositukset jokaiselle liikkeelle ensi kerralle (paino per sarja, toistot)
 3. Yksi tärkeä huomio pidemmästä kehityksestä (progressio, mahdollinen juuttuminen, palautuminen tai tarve kevyemmälle viikolle)
 
 Käytä RPE-arvoja jos ne on annettu:
@@ -596,7 +714,12 @@ ${plan[nextWorkout].exercises.map((e, i) => `${i + 1}. ${e.name} (${e.sets}×${e
 `;
 
   const historyText = sessions.slice(-5).map(s =>
-    `${s.date}: ${s.exercises.map(e => `${e.name} ${e.actualWeight}kg${e.rpe ? ' RPE' + e.rpe : ''}`).join(', ')}`
+    `${s.date}: ${s.exercises.map(e => {
+      if (e.sets && e.sets.length > 0) {
+        return `${e.name} ${formatSets(e.sets)}`;
+      }
+      return `${e.name} ${e.actualWeight || 0}kg`;
+    }).join('; ')}`
   ).join('\n');
 
   showLoading('Valmentaja miettii...');
@@ -682,12 +805,24 @@ function renderHistory() {
       const ex = s.exercises.find(e => e.id === 'bench');
       const row = document.createElement('div');
       row.className = 'history-row';
+
+      // Uusi sarjaformaatti tai vanha
+      let detailStr, badgeStr;
+      if (ex.sets && ex.sets.length > 0) {
+        detailStr = formatSets(ex.sets);
+        const maxW = Math.max(...ex.sets.map(x => x.weight || 0));
+        badgeStr = maxW + ' kg';
+      } else {
+        detailStr = (ex.actualSets || 0) + '×' + (ex.completedReps || 0) + ' @ ' + (ex.actualWeight || 0) + ' kg';
+        badgeStr = (ex.actualWeight || 0) + ' kg';
+      }
+
       row.innerHTML = `
         <div>
           <div class="history-date">${formatDate(s.date)}</div>
-          <div class="history-detail">${ex.actualSets}×${ex.completedReps} @ ${ex.actualWeight} kg</div>
+          <div class="history-detail">${detailStr}</div>
         </div>
-        <span class="badge badge-done">${ex.actualWeight} kg</span>
+        <span class="badge badge-done">${badgeStr}</span>
       `;
       benchEl.appendChild(row);
     });
