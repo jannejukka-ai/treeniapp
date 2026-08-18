@@ -289,7 +289,18 @@ body {
 .log-exercise { margin-bottom: 1.25rem; }
 .log-ex-name { font-size: 15px; font-weight: 600; margin-bottom: 0.5rem; }
 .log-ex-target { font-size: 13px; color: var(--text2); margin-bottom: 0.75rem; }
-.log-fields { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+.log-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.rpe-info {
+  background: rgba(59,130,246,0.08);
+  border: 1px solid rgba(59,130,246,0.2);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text2);
+  margin-bottom: 1.25rem;
+}
+.rpe-info strong { color: var(--accent); }
 .log-field label { font-size: 11px; color: var(--text2); display: block; margin-bottom: 4px; }
 .log-field input {
   width: 100%;
