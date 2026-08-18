@@ -26,7 +26,7 @@ body {
   padding-bottom: 5rem;
 }
 
-/* YlÃ¤palkki */
+/* Yläpalkki */
 .topbar {
   display: flex;
   justify-content: space-between;
@@ -313,6 +313,73 @@ body {
   color: var(--text);
   font-size: 14px;
 }
+
+/* Liikkeen toiminnot (vaihda/poista) */
+.ex-actions { display: flex; align-items: center; gap: 6px; margin-left: auto; flex-shrink: 0; }
+.ex-swap-btn {
+  font-size: 12px;
+  padding: 4px 10px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  color: var(--accent);
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.ex-swap-btn:hover { background: rgba(59,130,246,0.15); }
+.ex-remove-btn {
+  font-size: 14px;
+  width: 26px; height: 26px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  color: var(--text2);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0;
+}
+.ex-remove-btn:hover { background: rgba(239,68,68,0.15); color: var(--danger); }
+.add-exercise-btn {
+  width: 100%;
+  padding: 10px;
+  margin-top: 0.75rem;
+  background: transparent;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text2);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.add-exercise-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* Liikekirjaston valinta modalissa */
+.swap-category { margin-bottom: 1.25rem; }
+.swap-cat-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text2);
+  margin-bottom: 0.5rem;
+}
+.swap-option {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  text-align: left;
+  padding: 10px 14px;
+  margin-bottom: 6px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+.swap-option:hover { background: rgba(59,130,246,0.1); border-color: rgba(59,130,246,0.3); }
+.swap-option-name { font-size: 14px; font-weight: 500; color: var(--text); }
+.swap-option-note { font-size: 12px; color: var(--success); margin-top: 2px; }
 
 /* Lataus */
 .loading-overlay {
