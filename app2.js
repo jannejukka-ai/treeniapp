@@ -437,6 +437,10 @@ function renderDailyCoachMessage(nextWorkout, sessions) {
 // ============================================================
 // TREENIKIRJAUS MODAL
 // ============================================================
+// Pitää kirjaa siitä mikä liike on näkyvissä
+let currentLogStep = 0;
+let totalLogSteps = 0;
+
 function openLogModal() {
   const nextWorkout = getNextWorkout();
   const plan = getPlan()[nextWorkout];
@@ -446,16 +450,10 @@ function openLogModal() {
   form.innerHTML = '';
   form.dataset.workout = nextWorkout;
 
-  // RPE-selitys lomakkeen alkuun
-  const rpeInfo = document.createElement('div');
-  rpeInfo.className = 'rpe-info';
-  rpeInfo.innerHTML = `
-    <strong>Vinkki — mikä on RPE?</strong> RPE tarkoittaa kuinka raskaalta sarja tuntui (1–10).
-    <br>RPE 10 = et olisi jaksanut yhtään lisätoistoa. RPE 8 = kaksi toistoa olisi jäänyt varaan. Voit kirjata jokaiselle sarjalle oman painon, toistot ja RPE:n. Kaikki kentät ovat vapaaehtoisia.
-  `;
-  form.appendChild(rpeInfo);
+  currentLogStep = 0;
+  totalLogSteps = plan.exercises.length;
 
-  plan.exercises.forEach(ex => {
+  plan.exercises.forEach((ex, exIndex) => {
     const lastSession = [...sessions].reverse().find(s =>
       s.exercises && s.exercises.some(e => e.id === ex.id)
     );
@@ -467,23 +465,35 @@ function openLogModal() {
       const weights = lastEx.sets.map(s => s.weight || 0);
       suggestedWeight = suggestNextWeight(ex.id, lastEx, Math.max(...weights));
     } else if (lastEx && lastEx.actualWeight) {
-      // vanha dataformaatti (ennen sarjakohtaisuutta)
       suggestedWeight = suggestNextWeight(ex.id, lastEx, lastEx.actualWeight);
     }
 
-    // Montako sarjaa aloituksena: ohjelman määrä (tai viime kerran määrä)
     const startSetCount = lastEx && lastEx.sets ? lastEx.sets.length : ex.sets;
 
     const div = document.createElement('div');
-    div.className = 'log-exercise';
+    div.className = 'log-exercise log-step';
     div.dataset.exId = ex.id;
     div.dataset.exName = ex.name;
-    div.dataset.suggestedWeight = suggestedWeight;
-    div.dataset.targetReps = ex.reps;
+    div.dataset.stepIndex = exIndex;
+    // Vain ensimmäinen näkyvissä aluksi
+    div.style.display = exIndex === 0 ? 'block' : 'none';
+
+    // Edellisen kerran suoritus muistin tueksi
+    let lastTimeHtml = '';
+    if (lastEx && lastEx.sets && lastEx.sets.length > 0) {
+      lastTimeHtml = `<div class="log-last-time">Viime kerralla: ${formatSets(lastEx.sets)}</div>`;
+    } else if (lastEx && lastEx.actualWeight) {
+      lastTimeHtml = `<div class="log-last-time">Viime kerralla: ${lastEx.actualWeight} kg</div>`;
+    }
 
     div.innerHTML = `
+      <div class="log-step-header">
+        <span class="log-step-counter">Liike ${exIndex + 1}/${totalLogSteps}</span>
+      </div>
       <div class="log-ex-name">${ex.name}</div>
       <div class="log-ex-target">Tavoite: ${ex.reps}${ex.weight > 0 ? ' @ ' + suggestedWeight + ' kg (raskain sarja)' : ''}</div>
+      ${lastTimeHtml}
+      ${exIndex === 0 ? '<div class="rpe-hint">RPE = kuinka raskas sarja oli (1–10). 10 = maksimi, 8 = 2 toistoa jäi varaan. Vapaaehtoinen.</div>' : ''}
       <div class="sets-header">
         <span class="sets-col-label">Sarja</span>
         <span class="sets-col-label">Toistot</span>
@@ -496,15 +506,14 @@ function openLogModal() {
         <button type="button" class="set-btn-remove" onclick="removeSetRow('${ex.id}')">− Poista sarja</button>
       </div>
       <div class="log-notes">
-        <label>Huomioita koko liikkeestä (valinnainen)</label>
+        <label>Huomioita (valinnainen)</label>
         <input type="text" id="note-${ex.id}" placeholder="Esim. tekniikka hyvä, selkä kipeä..." />
       </div>
     `;
     form.appendChild(div);
 
     // Luo sarjarivit
-    const container = div.querySelector('#sets-' + ex.id);
-    const defaultReps = parseInt(ex.reps) || 8; // esitäytetään toistot ohjelman mukaan
+    const defaultReps = parseInt(ex.reps) || 8;
     for (let i = 0; i < startSetCount; i++) {
       const prevSet = lastEx && lastEx.sets && lastEx.sets[i] ? lastEx.sets[i] : null;
       const setWeight = prevSet ? prevSet.weight : suggestedWeight;
@@ -512,7 +521,59 @@ function openLogModal() {
     }
   });
 
+  // RPE-muistutus footeriin (kerran, ei joka liikkeeseen)
+  updateLogNav();
   document.getElementById('log-modal').style.display = 'flex';
+}
+
+// Näytä tietty askel (liike)
+function showLogStep(stepIndex) {
+  const steps = document.querySelectorAll('.log-step');
+  if (stepIndex < 0 || stepIndex >= steps.length) return;
+  steps.forEach((s, i) => {
+    s.style.display = (i === stepIndex) ? 'block' : 'none';
+  });
+  currentLogStep = stepIndex;
+  updateLogNav();
+  // Vieritä modaali ylös uuden liikkeen alkuun
+  const modal = document.querySelector('#log-modal .modal');
+  if (modal) modal.scrollTop = 0;
+}
+
+function nextLogStep() {
+  if (currentLogStep < totalLogSteps - 1) {
+    showLogStep(currentLogStep + 1);
+  }
+}
+
+function prevLogStep() {
+  if (currentLogStep > 0) {
+    showLogStep(currentLogStep - 1);
+  }
+}
+
+// Päivitä navigointinapit ja edistymispalkki
+function updateLogNav() {
+  const prevBtn = document.getElementById('log-prev-btn');
+  const nextBtn = document.getElementById('log-next-btn');
+  const saveBtn = document.getElementById('log-save-btn');
+  const progress = document.getElementById('log-progress-fill');
+
+  if (!prevBtn) return;
+
+  // Edellinen-nappi: piilota ensimmäisessä
+  prevBtn.style.visibility = currentLogStep === 0 ? 'hidden' : 'visible';
+
+  const isLast = currentLogStep === totalLogSteps - 1;
+  // Viimeisessä liikkeessä: näytä Tallenna, piilota Seuraava
+  nextBtn.style.display = isLast ? 'none' : 'block';
+  saveBtn.style.display = isLast ? 'block' : 'none';
+
+  // Edistymispalkki
+  if (progress) {
+    const pct = ((currentLogStep + 1) / totalLogSteps) * 100;
+    progress.style.width = pct + '%';
+  }
 }
 
 // Lisää yksi sarjarivi liikkeelle
