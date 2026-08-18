@@ -5,6 +5,29 @@ Uusin versio on aina ylimpänä.
 
 ---
 
+## v2.6 — 18.8.2026
+
+**Lepoajastin sarjojen väliin (uusi ominaisuus):**
+- Kirjausnäkymään lisätty lepoajastin sarjarivien ja navigointinappien väliin
+- "Aloita lepo 1:30" -nappi käynnistää ajastimen yhdellä kosketuksella
+- Iso, selkeä alaspäin juokseva numero (esim. 1:30 → 1:29 → ...)
+- Säätö lennossa: "+15 s" ja "−15 s" napit
+- "Ohita"-nappi lopettaa levon kesken
+- Kun aika loppuu: numero muuttuu vihreäksi ja vilkkuu ("Valmis!") — EI äänimerkkiä (käyttäjän toive)
+
+**Wake Lock — näyttö pysyy päällä:**
+- Ajastin pyytää näyttöä pysymään päällä koko lepoajan
+- Näin ajastin toimii vaikka et koske puhelimeen (näyttö ei sammu kesken levon)
+- Kun lepo loppuu tai painat "Ohita", näyttö saa taas sammua normaalisti
+- HUOM: Wake Lock toimii useimmilla iPhoneilla, mutta Applen tuki vaihtelee iOS-versioittain. Jos ei toimi omalla laitteella, varasuunnitelma on iPhonen oma Kello-ajastin.
+
+**Tekniset yksityiskohdat:**
+- Oletusaika 1:30 (90 s), ei muutettavissa asetuksissa (pidetty yksinkertaisena)
+- Ajastin ja Wake Lock sammuvat automaattisesti kun kirjaus suljetaan tai tallennetaan
+- Muokattu: app2.js (ajastinlogiikka, Wake Lock), index.html (ajastimen napit), style.css (ajastimen tyylit)
+
+---
+
 ## v2.5 — 18.8.2026
 
 **Kirjausnäkymä uudistettu selkeämmäksi (käytettävyys):**
