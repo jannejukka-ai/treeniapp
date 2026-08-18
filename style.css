@@ -289,7 +289,6 @@ body {
 .log-exercise { margin-bottom: 1.25rem; }
 .log-ex-name { font-size: 15px; font-weight: 600; margin-bottom: 0.5rem; }
 .log-ex-target { font-size: 13px; color: var(--text2); margin-bottom: 0.75rem; }
-.log-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .rpe-info {
   background: rgba(59,130,246,0.08);
   border: 1px solid rgba(59,130,246,0.2);
@@ -301,6 +300,60 @@ body {
   margin-bottom: 1.25rem;
 }
 .rpe-info strong { color: var(--accent); }
+
+/* Sarjakohtainen kirjaus */
+.sets-header {
+  display: grid;
+  grid-template-columns: 44px 1fr 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 6px;
+  padding: 0 2px;
+}
+.sets-col-label {
+  font-size: 11px;
+  color: var(--text2);
+  font-weight: 600;
+  text-align: center;
+}
+.sets-col-label:first-child { text-align: left; }
+.sets-container { display: flex; flex-direction: column; gap: 6px; }
+.set-row {
+  display: grid;
+  grid-template-columns: 44px 1fr 1fr 1fr;
+  gap: 8px;
+  align-items: center;
+}
+.set-num {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text2);
+  text-align: left;
+}
+.set-row input {
+  width: 100%;
+  padding: 10px 6px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: 16px;
+  text-align: center;
+}
+.set-row input:focus { outline: none; border-color: var(--accent); }
+.sets-buttons { display: flex; gap: 8px; margin-top: 10px; }
+.set-btn-add, .set-btn-remove {
+  flex: 1;
+  padding: 8px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.set-btn-add:hover { background: rgba(59,130,246,0.15); color: var(--accent); border-color: rgba(59,130,246,0.3); }
+.set-btn-remove:hover { background: rgba(239,68,68,0.12); color: var(--danger); border-color: rgba(239,68,68,0.3); }
 .log-field label { font-size: 11px; color: var(--text2); display: block; margin-bottom: 4px; }
 .log-field input {
   width: 100%;
