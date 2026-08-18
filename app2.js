@@ -453,6 +453,8 @@ function openLogModal() {
   currentLogStep = 0;
   totalLogSteps = plan.exercises.length;
 
+  resetRestTimerUI(); // varmista että ajastin on idle-tilassa
+
   plan.exercises.forEach((ex, exIndex) => {
     const lastSession = [...sessions].reverse().find(s =>
       s.exercises && s.exercises.some(e => e.id === ex.id)
@@ -617,7 +619,117 @@ function removeSetRow(exId) {
 }
 
 function closeLogModal() {
+  stopRestTimer(); // varmista että ajastin ja Wake Lock sammuvat
   document.getElementById('log-modal').style.display = 'none';
+}
+
+// ============================================================
+// LEPOAJASTIN
+// ============================================================
+const REST_DEFAULT_SECONDS = 90; // oletus 1:30
+let restRemaining = REST_DEFAULT_SECONDS;
+let restInterval = null;
+let wakeLock = null;
+
+// Muotoile sekunnit muotoon M:SS
+function formatRestTime(totalSeconds) {
+  if (totalSeconds < 0) totalSeconds = 0;
+  const m = Math.floor(totalSeconds / 60);
+  const s = totalSeconds % 60;
+  return m + ':' + (s < 10 ? '0' : '') + s;
+}
+
+// Pyydä näyttöä pysymään päällä (Wake Lock)
+async function requestWakeLock() {
+  try {
+    if ('wakeLock' in navigator) {
+      wakeLock = await navigator.wakeLock.request('screen');
+      // Jos näyttö menee pois ja takaisin, Wake Lock voi vapautua — pyydä uudelleen
+      wakeLock.addEventListener('release', () => {
+        wakeLock = null;
+      });
+    }
+  } catch (err) {
+    // Wake Lock ei tuettu tai epäonnistui — ajastin toimii silti kun näyttö on päällä
+    wakeLock = null;
+  }
+}
+
+// Vapauta Wake Lock
+async function releaseWakeLock() {
+  try {
+    if (wakeLock) {
+      await wakeLock.release();
+      wakeLock = null;
+    }
+  } catch (err) {
+    wakeLock = null;
+  }
+}
+
+// Käynnistä lepoajastin
+function startRestTimer() {
+  restRemaining = REST_DEFAULT_SECONDS;
+
+  document.getElementById('rest-timer-idle').style.display = 'none';
+  document.getElementById('rest-timer-active').style.display = 'block';
+
+  const display = document.getElementById('rest-time-display');
+  display.textContent = formatRestTime(restRemaining);
+  display.classList.remove('rest-done');
+
+  requestWakeLock();
+
+  if (restInterval) clearInterval(restInterval);
+  restInterval = setInterval(() => {
+    restRemaining--;
+    display.textContent = formatRestTime(restRemaining);
+
+    if (restRemaining <= 0) {
+      // Aika loppui — visuaalinen hälytys, ei ääntä
+      clearInterval(restInterval);
+      restInterval = null;
+      display.textContent = 'Valmis!';
+      display.classList.add('rest-done');
+      releaseWakeLock();
+      // Palaa idle-tilaan 3 sekunnin kuluttua
+      setTimeout(() => {
+        resetRestTimerUI();
+      }, 3000);
+    }
+  }, 1000);
+}
+
+// Säädä lepoaikaa lennossa (+/- sekuntia)
+function adjustRestTimer(delta) {
+  restRemaining += delta;
+  if (restRemaining < 5) restRemaining = 5; // ei mene liian pieneksi
+  if (restRemaining > 600) restRemaining = 600; // max 10 min
+  const display = document.getElementById('rest-time-display');
+  if (display) display.textContent = formatRestTime(restRemaining);
+}
+
+// Pysäytä ajastin (Ohita-nappi tai modaalin sulku)
+function stopRestTimer() {
+  if (restInterval) {
+    clearInterval(restInterval);
+    restInterval = null;
+  }
+  releaseWakeLock();
+  resetRestTimerUI();
+}
+
+// Palauta ajastin idle-tilaan
+function resetRestTimerUI() {
+  const idle = document.getElementById('rest-timer-idle');
+  const active = document.getElementById('rest-timer-active');
+  const display = document.getElementById('rest-time-display');
+  if (idle) idle.style.display = 'block';
+  if (active) active.style.display = 'none';
+  if (display) {
+    display.classList.remove('rest-done');
+    display.textContent = formatRestTime(REST_DEFAULT_SECONDS);
+  }
 }
 
 async function submitLog() {
