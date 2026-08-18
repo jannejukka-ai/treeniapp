@@ -183,10 +183,12 @@
       <h3 class="modal-title">Kirjaa treeni</h3>
       <button class="icon-btn" onclick="closeLogModal()">✕</button>
     </div>
+    <div class="log-progress-bar"><div class="log-progress-fill" id="log-progress-fill"></div></div>
     <div id="log-form"></div>
-    <div class="modal-footer">
-      <button class="btn-secondary" onclick="closeLogModal()">Peruuta</button>
-      <button class="btn-primary" onclick="submitLog()">Tallenna ja analysoi</button>
+    <div class="modal-footer log-nav-footer">
+      <button class="btn-secondary log-nav-prev" id="log-prev-btn" onclick="prevLogStep()">← Edellinen</button>
+      <button class="btn-primary log-nav-next" id="log-next-btn" onclick="nextLogStep()">Seuraava liike →</button>
+      <button class="btn-primary log-nav-save" id="log-save-btn" onclick="submitLog()" style="display:none;">Tallenna ja analysoi</button>
     </div>
   </div>
 </div>
