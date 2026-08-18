@@ -358,6 +358,21 @@ body {
 .log-nav-prev { flex: 0 0 auto; }
 .log-nav-next, .log-nav-save { flex: 1; }
 
+/* Tallennettu-välähdys */
+.log-saved-hint {
+  text-align: center;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--success);
+  margin-top: 8px;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+}
+.log-saved-hint.show {
+  opacity: 1;
+}
+
 /* Lepoajastin */
 .rest-timer {
   margin: 1rem 0;
