@@ -837,7 +837,20 @@ function saveDraft() {
   try {
     const draft = collectLogData();
     localStorage.setItem('workoutDraft', JSON.stringify(draft));
+    flashSavedHint();
   } catch (e) { /* ohita tallennusvirhe */ }
+}
+
+// Näytä "✓ Tallennettu" -välähdys hetken
+let savedHintTimeout = null;
+function flashSavedHint() {
+  const hint = document.getElementById('log-saved-hint');
+  if (!hint) return;
+  hint.classList.add('show');
+  if (savedHintTimeout) clearTimeout(savedHintTimeout);
+  savedHintTimeout = setTimeout(() => {
+    hint.classList.remove('show');
+  }, 1500);
 }
 
 function getDraft() {
