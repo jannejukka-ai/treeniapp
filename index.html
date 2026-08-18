@@ -185,6 +185,21 @@
     </div>
     <div class="log-progress-bar"><div class="log-progress-fill" id="log-progress-fill"></div></div>
     <div id="log-form"></div>
+    <div class="rest-timer" id="rest-timer">
+      <div class="rest-timer-idle" id="rest-timer-idle">
+        <button class="rest-start-btn" onclick="startRestTimer()">
+          <span class="rest-start-icon">⏱</span> Aloita lepo 1:30
+        </button>
+      </div>
+      <div class="rest-timer-active" id="rest-timer-active" style="display:none;">
+        <div class="rest-time-display" id="rest-time-display">1:30</div>
+        <div class="rest-timer-controls">
+          <button class="rest-adjust-btn" onclick="adjustRestTimer(-15)">−15 s</button>
+          <button class="rest-skip-btn" onclick="stopRestTimer()">Ohita</button>
+          <button class="rest-adjust-btn" onclick="adjustRestTimer(15)">+15 s</button>
+        </div>
+      </div>
+    </div>
     <div class="modal-footer log-nav-footer">
       <button class="btn-secondary log-nav-prev" id="log-prev-btn" onclick="prevLogStep()">← Edellinen</button>
       <button class="btn-primary log-nav-next" id="log-next-btn" onclick="nextLogStep()">Seuraava liike →</button>
