@@ -5,6 +5,31 @@ Uusin versio on aina ylimpänä.
 
 ---
 
+## v2.4 — 18.8.2026
+
+**Sarjakohtainen kirjaus (iso parannus):**
+- Jokaiselle sarjalle voi nyt kirjata OMAN painon, toistot ja RPE:n erikseen
+  - Esim. Sarja 1: 80 kg, Sarja 2: 90 kg, Sarja 3: 92.5 kg
+- Aiemmin pystyi kirjaamaan vain yhden painon per liike — sarjojen väliset erot katosivat
+- Sarjojen määrää voi säätää lennossa: "+ Lisää sarja" ja "− Poista sarja" napit
+- Voit siis tehdä jonain päivänä 3 sarjaa, toisena 4 — ilman ohjelman muokkaamista
+- Toistot esitäytetään ohjelman mukaan (nopea täyttää), painot voi säätää per sarja
+
+**Valmentaja tulkitsee nyt sarjojen suunnan (fiksumpi analyysi):**
+- NOUSEVA suoritus (80→90→92.5): tunnistaa että oli varaa, suosittelee raskaimman sarjan pohjalta
+- LASKEVA suoritus (92.5→90→85): tunnistaa väsymisen merkittävänä signaalina, suosittelee maltillisemmin
+- TASAINEN suoritus (90→90→90): vakaa pohja progressiiviselle nostolle
+- "Seuraava kerta" -suositus perustuu raskaimpaan sarjaan jos suunta on nouseva
+
+**Tekniset muutokset:**
+- Tietoformaatti muuttui: paino/toistot/RPE tallennetaan nyt per sarja
+- Vanhat kirjaukset säilyvät ja toimivat (taaksepäin-yhteensopivuus)
+- Historia-näkymä ja valmentaja päivitetty näyttämään sarjakohtaiset painot
+- Muokattu: app2.js (kirjaus, tallennus, analyysi, historia, progressiologiikka)
+- Muokattu: style.css (sarjarivien asettelu)
+
+---
+
 ## v2.3 — 18.8.2026
 
 **Keskivartalon (core) vahvistus — tärkeä selän tuelle:**
