@@ -12,6 +12,7 @@ const DEFAULT_PLAN = {
       { id: 'lat', name: 'Ylätalja / Leuanveto', sets: 3, reps: '8–10', weight: 70, unit: 'kg', note: 'Yläselkä vastapainoksi' },
       { id: 'bsq', name: 'Bulgarialainen split-kyykky', sets: 3, reps: '8–10/jalka', weight: 0, unit: 'kg', note: 'Etureidet & tasapaino — selkäystävällinen' },
       { id: 'tri', name: 'Ojentajapunnerrus taljassa', sets: 2, reps: '10–12', weight: 25, unit: 'kg', note: 'Penkin avuksi (dipin sijaan, säästää olkapäitä)' },
+      { id: 'plank', name: 'Lankku', sets: 3, reps: '30–45 s', weight: 0, unit: 'kg', note: 'Keskivartalon tuki — selkäystävällinen' },
     ]
   },
   B: {
@@ -21,6 +22,7 @@ const DEFAULT_PLAN = {
       { id: 'row', name: 'Kulmasoutu', sets: 3, reps: '8–10', weight: 70, unit: 'kg', note: 'Keskiselkä & penkin tukilihakset' },
       { id: 'ohp', name: 'Hartiaprässi istuen (selkätuki)', sets: 2, reps: '10–12', weight: 40, unit: 'kg', note: 'Olkapäät — selkä tuettuna' },
       { id: 'curl', name: 'Hauiskääntö', sets: 2, reps: '10–12', weight: 20, unit: 'kg', note: 'Käsivarren tasapaino' },
+      { id: 'splank', name: 'Sivulankku', sets: 2, reps: '20–30 s/puoli', weight: 0, unit: 'kg', note: 'Vinot vatsalihakset — tukee selkää sivusuunnassa' },
     ]
   }
 };
@@ -32,7 +34,7 @@ const EXERCISE_LIBRARY = {
     { name: 'Penkkipunnerrus', note: '' },
     { name: 'Vinopenkkipunnerrus', note: '' },
     { name: 'Käsipainopenkki', note: '' },
-    { name: 'Taljaristikkäveto', note: '' },
+    { name: 'Ristikkäinveto taljassa', note: '' },
     { name: 'Punnerrus', note: 'Kehon paino' },
   ],
   'Selkä': [
@@ -69,8 +71,12 @@ const EXERCISE_LIBRARY = {
   ],
   'Vatsa/keskivartalo': [
     { name: 'Lankku', note: 'Selkäystävällinen' },
+    { name: 'Sivulankku', note: 'Selkäystävällinen — vinot vatsalihakset' },
+    { name: 'Lintukoira', note: 'Selkäystävällinen — fysioterapiassa suositeltu' },
+    { name: 'Kuollut hyönteinen (dead bug)', note: 'Selkäystävällinen — syvät vatsalihakset' },
     { name: 'Vatsarutistus', note: '' },
-    { name: 'Sivulankku', note: 'Selkäystävällinen' },
+    { name: 'Polvien nosto riipunnasta', note: 'Alavatsa' },
+    { name: 'Vuoristokiipeilijä', note: 'Core + syke' },
   ],
 };
 
@@ -80,7 +86,8 @@ Käyttäjä: JJ
 Tavoitteet: lihasmassan kasvu, voiman lisääminen, terveyden ylläpito
 Rajoitteet: selkävaurio JA olkapäät säästettävä. ÄLÄ suosittele tavallista maastavetoa, suorin jaloin maastavetoa (RDL) äläkä seisten tehtävää pystypunnerrusta. Turvalliset vaihtoehdot: lantionnosto (selkä tuettuna), Bulgarialainen split-kyykky, hartiaprässi istuen selkätuella.
 Treenifrekvenssi: 2 kertaa viikossa (realistinen tavoite)
-Treenijako: A (Yläkroppa työntö + Etujalat) ja B (Yläkroppa veto + Takajalat) vuorotellen
+Treenijako: A (Yläkroppa työntö + Etujalat) ja B (Yläkroppa veto + Takajalat) vuorotellen. Molemmissa on keskivartaloliike (lankku/sivulankku) lopussa — tärkeä selän tuelle.
+Huom: lankut ja sivulankut mitataan sekunneissa, ei painossa. Näissä progressio tarkoittaa pidempää kestoaikaa, ei lisäpainoa.
 RPE: käyttäjä voi kirjata jokaiselle liikkeelle RPE-arvon (1–10, koettu kuormittavuus). Käytä sitä progression suunnitteluun kun se on annettu.
 Kieli: suomi
 `;
@@ -247,6 +254,9 @@ function renderExerciseList(workoutKey, plan, sessions) {
 function suggestNextWeight(exerciseId, lastEx) {
   if (!lastEx || !lastEx.actualWeight) return 0;
   const w = parseFloat(lastEx.actualWeight);
+  // Aikaperustaiset core-liikkeet (lankku ym.): ei automaattista painonlisäystä
+  const timeBased = ['plank', 'splank'];
+  if (timeBased.includes(exerciseId)) return w;
   if (exerciseId === 'bench') return w + 2.5;
   if (lastEx.completedReps && lastEx.targetReps && lastEx.completedReps >= lastEx.targetReps) {
     return w + 2.5;
