@@ -1,16 +1,198 @@
-{
-  "name": "Treeniapp",
-  "short_name": "Treeniapp",
-  "description": "Henkilökohtainen kuntosalivalmentaja",
-  "start_url": "/",
-  "display": "standalone",
-  "background_color": "#0f172a",
-  "theme_color": "#0f172a",
-  "icons": [
-    {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%233b82f6'/><text y='.9em' font-size='80' x='10'>💪</text></svg>",
-      "sizes": "any",
-      "type": "image/svg+xml"
-    }
-  ]
-}
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0f172a" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>Treeniapp</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div id="app">
+
+  <!-- Yläpalkki -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <span class="app-name">Treeniapp</span>
+    </div>
+    <div class="topbar-right">
+      <button class="icon-btn" onclick="showPage('settings')" aria-label="Asetukset">⚙️</button>
+    </div>
+  </header>
+
+  <!-- Navigaatio -->
+  <nav class="tab-bar">
+    <button class="tab active" data-page="home" onclick="showPage('home')">Treeni</button>
+    <button class="tab" data-page="coach" onclick="showPage('coach')">Valmentaja</button>
+    <button class="tab" data-page="history" onclick="showPage('history')">Historia</button>
+  </nav>
+
+  <!-- SIVU: Treeni -->
+  <main id="page-home" class="page active">
+    <div class="section">
+
+      <div class="greeting-row">
+        <div>
+          <p class="greeting-sub">Hei, JJ</p>
+          <h1 class="greeting-main" id="today-label">Ladataan...</h1>
+        </div>
+        <div class="week-badge">
+          <span id="week-label">Viikko —</span>
+        </div>
+      </div>
+
+      <!-- Valmentajan viesti -->
+      <div class="coach-bubble" id="coach-daily-msg">
+        <div class="coach-bubble-header">
+          <span class="coach-icon">🤖</span>
+          <span class="coach-title">AI-valmentaja</span>
+        </div>
+        <p class="coach-text" id="coach-msg-text">Ladataan päivän ohjeistusta...</p>
+      </div>
+
+      <!-- Viikonpisteet -->
+      <div class="card">
+        <div class="card-label">Tämä viikko</div>
+        <div class="week-dots" id="week-dots"></div>
+        <p class="week-summary" id="week-summary"></p>
+      </div>
+
+      <!-- Treenilista -->
+      <div class="card" id="workout-card">
+        <div class="card-label" id="workout-title">Treenin liikkeet</div>
+        <div id="exercise-list"></div>
+        <button class="btn-primary" id="log-btn" onclick="openLogModal()">Kirjaa treeni tehtyä</button>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- SIVU: Valmentaja -->
+  <main id="page-coach" class="page">
+    <div class="section">
+
+      <h2 class="page-title">AI-valmentaja</h2>
+
+      <div class="card">
+        <div class="card-label">Tavoitteesi</div>
+        <div class="goal-row"><span class="goal-dot accent"></span><span>Lihasmassan kasvu</span></div>
+        <div class="goal-row"><span class="goal-dot accent"></span><span>Voiman lisääminen</span></div>
+        <div class="goal-row"><span class="goal-dot accent"></span><span>Kuntoilu ja terveys</span></div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">Kysy valmentajalta</div>
+        <div class="quick-questions">
+          <button class="q-btn" onclick="askCoach('Selkäni on kipeä tänään. Mitkä liikkeet ovat turvallisia ja mitä pitäisi välttää?')">Selkä on kipeä tänään</button>
+          <button class="q-btn" onclick="askCoach('En ole treenannut 2 viikkoon. Miten palaan harjoitteluun turvallisesti?')">Olen ollut tauolla 2 viikkoa</button>
+          <button class="q-btn" onclick="askCoach('Penkkipunnerrus ei tunnu nousevan. Mitä voin tehdä progressioon?')">Penkki ei nouse — mitä teen?</button>
+          <button class="q-btn" onclick="askCoach('Polvi on hieman arka. Mitkä jalkaliikkeet ovat turvallisia?')">Polvi on arka</button>
+          <button class="q-btn" onclick="askCoach('Analysoi treenini viimeisen kuukauden ajalta ja kerro edistymisestäni.')">Analysoi edistymiseni</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">Kirjoita oma kysymys</div>
+        <textarea id="custom-question" class="textarea" placeholder="Esim. Miten voin parantaa penkkipunnerrustekniikkaani?"></textarea>
+        <button class="btn-primary" onclick="askCustomQuestion()">Lähetä kysymys</button>
+      </div>
+
+      <div class="card" id="coach-answer-card" style="display:none;">
+        <div class="card-label">Valmentajan vastaus</div>
+        <p class="coach-answer-text" id="coach-answer-text"></p>
+      </div>
+
+      <div class="card">
+        <div class="card-label">Treenijako</div>
+        <p class="split-text"><strong>Treeni A — Push + jalat</strong><br>Penkkipunnerrus, ylätalja, Bulgarian split-kyykky, dippi</p>
+        <p class="split-text" style="margin-top: 0.75rem;"><strong>Treeni B — Pull + yläkroppa</strong><br>Vipunosto, kulmasoutu, hartiaprässi, hauiskääntö</p>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- SIVU: Historia -->
+  <main id="page-history" class="page">
+    <div class="section">
+
+      <h2 class="page-title">Treenihistoria</h2>
+
+      <div class="metric-row">
+        <div class="metric-card">
+          <div class="metric-val" id="total-sessions">0</div>
+          <div class="metric-lbl">Treeniä yhteensä</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-val" id="total-weeks">0</div>
+          <div class="metric-lbl">Viikkoa ohjelmassa</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">Penkkipunnerrus — kehitys</div>
+        <div id="bench-history"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">Kaikki treenikertasi</div>
+        <div id="all-sessions"></div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- SIVU: Asetukset -->
+  <main id="page-settings" class="page">
+    <div class="section">
+
+      <h2 class="page-title">Asetukset</h2>
+
+      <div class="card">
+        <div class="card-label">API-avain</div>
+        <p class="settings-help">Liitä tähän Anthropic API -avaimesi. Se tallennetaan vain tähän laitteeseen.</p>
+        <input type="password" id="api-key-input" class="text-input" placeholder="sk-ant-api03-..." />
+        <button class="btn-primary" onclick="saveApiKey()">Tallenna avain</button>
+        <p class="settings-status" id="api-status"></p>
+      </div>
+
+      <div class="card">
+        <div class="card-label">Tietojen nollaus</div>
+        <p class="settings-help">Poistaa kaikki kirjatut treenisi pysyvästi.</p>
+        <button class="btn-danger" onclick="clearAllData()">Poista kaikki tiedot</button>
+      </div>
+
+    </div>
+  </main>
+
+</div>
+
+<!-- Treenikirjaus Modal -->
+<div class="modal-overlay" id="log-modal" style="display:none;">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title">Kirjaa treeni</h3>
+      <button class="icon-btn" onclick="closeLogModal()">✕</button>
+    </div>
+    <div id="log-form"></div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeLogModal()">Peruuta</button>
+      <button class="btn-primary" onclick="submitLog()">Tallenna ja analysoi</button>
+    </div>
+  </div>
+</div>
+
+<!-- Latausruutu -->
+<div class="loading-overlay" id="loading" style="display:none;">
+  <div class="loading-box">
+    <div class="spinner"></div>
+    <p id="loading-text">AI-valmentaja analysoi...</p>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
