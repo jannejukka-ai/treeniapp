@@ -5,6 +5,27 @@ Uusin versio on aina ylimpänä.
 
 ---
 
+## v2.7 — 18.8.2026
+
+**Automaattinen välitallennus — treeni ei enää katoa (tärkeä turvaverkko):**
+- Ennen: treeni tallentui vasta lopussa "Tallenna ja analysoi" -napilla. Jos kirjaus keskeytyi (vahinko-sulku, selain kaatui, puhelin sulki taustan), koko treeni katosi.
+- Nyt: treeni tallentuu automaattisesti joka kerta kun painat "Seuraava liike" tai "Edellinen"
+- Jos treeni keskeytyy, siihen asti kirjatut tiedot ovat tallessa
+
+**"Jatka keskeneräistä?" -kysymys:**
+- Kun avaat "Kirjaa treeni" ja keskeneräinen treeni löytyy, sovellus kysyy haluatko jatkaa
+- "OK" = jatka mihin jäit (myös oikea liike, sarjat, painot ja RPE palautuvat)
+- "Peruuta" = aloita uusi treeni alusta
+- Tyhjää keskeneräistä ei kysytä turhaan (vain jos oikeasti kirjattua dataa)
+
+**Tekniset yksityiskohdat:**
+- Keskeneräinen treeni tallennetaan erilliseen "workoutDraft"-muistiin, erillään valmiista treeneistä
+- Kun treeni valmistuu ("Tallenna ja analysoi"), keskeneräinen poistetaan automaattisesti
+- X-napista sulkeminen säilyttää keskeneräisen (voit jatkaa myöhemmin)
+- Muokattu: app2.js (välitallennuslogiikka, jatka-kysymys, datan palautus)
+
+---
+
 ## v2.6 — 18.8.2026
 
 **Lepoajastin sarjojen väliin (uusi ominaisuus):**
