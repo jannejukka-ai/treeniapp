@@ -5,6 +5,18 @@ Uusin versio on aina ylimpänä.
 
 ---
 
+## v2.8 — 18.8.2026
+
+**"✓ Tallennettu" -välähdys (pieni käytettävyysparannus):**
+- Kun painat "Seuraava liike" tai "Edellinen", navigointinappien alle välähtää hetkeksi "✓ Tallennettu"
+- Vahvistaa että kirjauksesi on turvassa juuri silloin kun välitallennus tapahtuu
+- Häviää automaattisesti 1,5 sekunnin kuluttua — ei jää tielle eikä lisää pysyvää kohinaa näkymään
+
+**Tekniset muutokset:**
+- Muokattu: app2.js (välähdysfunktio), index.html (vihje-elementti), style.css (häivytysanimaatio)
+
+---
+
 ## v2.7 — 18.8.2026
 
 **Automaattinen välitallennus — treeni ei enää katoa (tärkeä turvaverkko):**
