@@ -5,6 +5,50 @@ Uusin versio on aina ylimpänä.
 
 ---
 
+## v2.2 — 18.8.2026
+
+**Korjaus:**
+- Korjattu treenien nimet kuvaamaan sisältöä rehellisemmin (jalkaliikkeet mukana):
+  - Treeni A: "Yläkroppa (työntö) + Etujalat"
+  - Treeni B: "Yläkroppa (veto) + Takajalat"
+- Aiemmat nimet antoivat ymmärtää että kyse on puhtaista työntö/veto-treeneistä, vaikka molemmissa on myös jalkaliike (tarpeen 2 kertaa viikossa -tahdissa)
+
+**Tekniset muutokset:**
+- Muokattu: app2.js (treenien nimet ja valmentajan profiili)
+
+---
+
+## v2.1 — 18.8.2026
+
+**Treenijaon parannukset (asiantuntija-arvion pohjalta):**
+- Uudistettu treenijako tasapainoisemmaksi 2 kertaa viikossa -tahtiin
+- Korjattu nimet: A = "Työntävät + Yläselkä", B = "Vetävät + Alavartalo" (aiemmin harhaanjohtavat Push/Pull)
+- Lisätty takaketjun liike: Lantionnosto (pakarat & takareidet) — aiemmin puuttui kokonaan
+- Vähennetty olkapäiden kuormitusta: Dippi korvattu ojentajapunnerruksella
+- Turvamuutokset selkävaivan vuoksi: EI tavallista maastavetoa, EI RDL-maastavetoa, EI seisten tehtävää pystypunnerrusta
+- Hartiaprässi vaihdettu istuen tehtäväksi (selkätuki)
+
+**Uusi ominaisuus — RPE-seuranta:**
+- Jokaiselle liikkeelle voi kirjata RPE-arvon (1–10, koettu kuormittavuus)
+- Kirjauslomakkeessa selitys mikä RPE on
+- AI-valmentaja käyttää RPE-arvoja tarkempaan progressioon (kevyt RPE → nosta painoa, korkea RPE → varo ylikuormitusta)
+
+**Valmentajan parannukset:**
+- Valmentaja arvioi nyt pidemmän aikavälin kehitystä (10 treenin trendi)
+- Huomioi mahdollisen juuttumisen ja palautusviikon tarpeen
+- Tietää selkä- ja olkapäärajoitteet tarkemmin
+
+**Liikekirjaston päivitys:**
+- Lantionnosto lisätty selkäystävällisiin jalkaliikkeisiin
+- Tavallinen maastaveto ja RDL poistettu kirjastosta
+- Olkapääliikkeet merkitty selkäystävällisyyden mukaan
+
+**Tekniset muutokset:**
+- Muokattu: app2.js (treenijako, RPE-logiikka, valmentajan promptit)
+- Muokattu: style.css (RPE-kenttä, kirjauslomakkeen 2×2-asettelu)
+
+---
+
 ## v2.0 — 18.8.2026
 
 **Uudet ominaisuudet:**
