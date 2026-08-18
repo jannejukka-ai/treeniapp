@@ -5,6 +5,28 @@ Uusin versio on aina ylimpänä.
 
 ---
 
+## v2.5 — 18.8.2026
+
+**Kirjausnäkymä uudistettu selkeämmäksi (käytettävyys):**
+- Kirjaus näyttää nyt YHDEN liikkeen kerrallaan (aiemmin kaikki liikkeet yhtä aikaa → näkymä oli täysi)
+- Etenet napilla "Seuraava liike →" ja voit palata "← Edellinen"
+- Yläreunassa edistymispalkki ja laskuri (esim. "Liike 2/5")
+- Viimeisessä liikkeessä nappi vaihtuu muotoon "Tallenna ja analysoi"
+- Ruudulla on kerralla noin 12 lohkoa aiemman 35+ sijaan — paljon vähemmän vieritystä
+- Jokaisen liikkeen kohdalla näkyy "Viime kerralla" -muistutus edellisistä painoista
+- RPE-selitys tiivistetty ja näkyy vain ensimmäisessä liikkeessä (ei toistu joka liikkeessä)
+
+**Ei toiminnallisia muutoksia:**
+- Sarjakohtainen kirjaus, sarjojen lisäys/poisto ja valmentajan analyysi toimivat kuten ennen
+- Vain näkymän rakenne muuttui selkeämmäksi
+
+**Tekniset muutokset:**
+- Muokattu: app2.js (kirjausnäkymän vaiheistus ja navigointi)
+- Muokattu: index.html (edistymispalkki ja navigointinapit)
+- Muokattu: style.css (uuden näkymän tyylit)
+
+---
+
 ## v2.4 — 18.8.2026
 
 **Sarjakohtainen kirjaus (iso parannus):**
