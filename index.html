@@ -160,6 +160,12 @@
       </div>
 
       <div class="card">
+        <div class="card-label">Treenijaon palautus</div>
+        <p class="settings-help">Palauttaa alkuperäiset liikkeet. Treenihistoriasi säilyy.</p>
+        <button class="btn-secondary" style="width:100%;" onclick="resetPlan()">Palauta alkuperäinen treenijako</button>
+      </div>
+
+      <div class="card">
         <div class="card-label">Tietojen nollaus</div>
         <p class="settings-help">Poistaa kaikki kirjatut treenisi pysyvästi.</p>
         <button class="btn-danger" onclick="clearAllData()">Poista kaikki tiedot</button>
@@ -185,6 +191,20 @@
   </div>
 </div>
 
+<!-- Liikkeen vaihto Modal -->
+<div class="modal-overlay" id="swap-modal" style="display:none;">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title" id="swap-modal-title">Vaihda liike</h3>
+      <button class="icon-btn" onclick="closeSwapModal()">✕</button>
+    </div>
+    <div id="swap-body"></div>
+    <div class="modal-footer">
+      <button class="btn-secondary" style="width:100%;" onclick="closeSwapModal()">Peruuta</button>
+    </div>
+  </div>
+</div>
+
 <!-- Latausruutu -->
 <div class="loading-overlay" id="loading" style="display:none;">
   <div class="loading-box">
@@ -193,6 +213,6 @@
   </div>
 </div>
 
-<script src="app.js"></script>
+<script src="app2.js"></script>
 </body>
 </html>
