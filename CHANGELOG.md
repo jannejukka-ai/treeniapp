@@ -5,6 +5,28 @@ Uusin versio on aina ylimpänä.
 
 ---
 
+## v2.3 — 18.8.2026
+
+**Keskivartalon (core) vahvistus — tärkeä selän tuelle:**
+- Lisätty core-liike molempiin oletustreeneihin (aiemmin puuttui kokonaan)
+  - Treeni A loppuun: Lankku (3 × 30–45 s)
+  - Treeni B loppuun: Sivulankku (2 × 20–30 s/puoli)
+- Laajennettu kirjaston vatsa/core-valikoima 3 → 7 liikkeeseen
+- Uudet liikkeet: Lintukoira, Kuollut hyönteinen (dead bug), Polvien nosto riipunnasta, Vuoristokiipeilijä
+- Lintukoira ja dead bug ovat fysioterapiassa suositeltuja selkäystävällisiä liikkeitä
+
+**Kieliasun parannukset:**
+- "Kirjaa treeni tehtyä" → "Kirjaa treeni"
+- "Taljaristikkäveto" → "Ristikkäinveto taljassa"
+
+**Tekniset muutokset:**
+- Aikaperustaiset liikkeet (lankku, sivulankku) eivät saa automaattista painonlisäysehdotusta — progressio tarkoittaa pidempää kestoa
+- Valmentaja tietää nyt core-liikkeet ja niiden aikaperustaisen progression
+- Muokattu: app2.js (core-liikkeet, kirjasto, valmentajan profiili, painologiikka)
+- Muokattu: index.html (napin teksti)
+
+---
+
 ## v2.2 — 18.8.2026
 
 **Korjaus:**
