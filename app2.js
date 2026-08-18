@@ -442,7 +442,38 @@ let currentLogStep = 0;
 let totalLogSteps = 0;
 
 function openLogModal() {
-  const nextWorkout = getNextWorkout();
+  // Tarkista onko keskeneräinen treeni tallessa
+  const draft = getDraft();
+  if (draft && draft.exercises && draft.exercises.length > 0) {
+    // Onko draftissa oikeasti kirjattuja arvoja? (ettei kysytä turhaan tyhjästä)
+    const hasData = draft.exercises.some(e =>
+      e.sets && e.sets.some(s => s.weight > 0 || s.reps > 0 || s.rpe)
+    );
+    if (hasData) {
+      const draftDate = new Date(draft.timestamp);
+      const dateStr = draftDate.toLocaleDateString('fi-FI', { day: 'numeric', month: 'short' });
+      const timeStr = draftDate.toLocaleTimeString('fi-FI', { hour: '2-digit', minute: '2-digit' });
+      const jatka = confirm(
+        'Sinulla on keskeneräinen treeni (' + dateStr + ' klo ' + timeStr + ').\n\n' +
+        'Haluatko jatkaa siitä mihin jäit?\n\n' +
+        'OK = Jatka keskeneräistä\nPeruuta = Aloita uusi treeni alusta'
+      );
+      if (jatka) {
+        openLogModalWithData(draft);
+        return;
+      } else {
+        clearDraft(); // aloitetaan puhtaalta pöydältä
+      }
+    } else {
+      clearDraft(); // tyhjä draft, poista
+    }
+  }
+  openLogModalWithData(null);
+}
+
+// Avaa kirjausmodaali — joko tyhjänä (draftData=null) tai keskeneräisen datan kanssa
+function openLogModalWithData(draftData) {
+  const nextWorkout = draftData ? draftData.workout : getNextWorkout();
   const plan = getPlan()[nextWorkout];
   const sessions = getSessions();
 
@@ -461,6 +492,9 @@ function openLogModal() {
     );
     const lastEx = lastSession ? lastSession.exercises.find(e => e.id === ex.id) : null;
 
+    // Jos jatketaan keskeneräistä, hae tämän liikkeen draft-data
+    const draftEx = draftData ? draftData.exercises.find(e => e.id === ex.id) : null;
+
     // Ehdotettu aloituspaino: raskain sarja viime kerralta, tai ohjelman oletus
     let suggestedWeight = ex.weight;
     if (lastEx && lastEx.sets && lastEx.sets.length > 0) {
@@ -470,7 +504,15 @@ function openLogModal() {
       suggestedWeight = suggestNextWeight(ex.id, lastEx, lastEx.actualWeight);
     }
 
-    const startSetCount = lastEx && lastEx.sets ? lastEx.sets.length : ex.sets;
+    // Sarjojen määrä: draftista jos jatketaan, muuten viime kerta tai ohjelma
+    let startSetCount;
+    if (draftEx && draftEx.sets && draftEx.sets.length > 0) {
+      startSetCount = draftEx.sets.length;
+    } else if (lastEx && lastEx.sets) {
+      startSetCount = lastEx.sets.length;
+    } else {
+      startSetCount = ex.sets;
+    }
 
     const div = document.createElement('div');
     div.className = 'log-exercise log-step';
@@ -514,17 +556,34 @@ function openLogModal() {
     `;
     form.appendChild(div);
 
+    // Täytä huomiokenttä draftista jos jatketaan
+    if (draftEx && draftEx.note) {
+      const noteInput = document.getElementById('note-' + ex.id);
+      if (noteInput) noteInput.value = draftEx.note;
+    }
+
     // Luo sarjarivit
     const defaultReps = parseInt(ex.reps) || 8;
     for (let i = 0; i < startSetCount; i++) {
-      const prevSet = lastEx && lastEx.sets && lastEx.sets[i] ? lastEx.sets[i] : null;
-      const setWeight = prevSet ? prevSet.weight : suggestedWeight;
-      addSetRow(ex.id, defaultReps, setWeight);
+      if (draftEx && draftEx.sets && draftEx.sets[i]) {
+        // Jatketaan: käytä draftin arvoja (myös RPE)
+        const ds = draftEx.sets[i];
+        addSetRow(ex.id, ds.reps || defaultReps, ds.weight || 0, ds.rpe);
+      } else {
+        const prevSet = lastEx && lastEx.sets && lastEx.sets[i] ? lastEx.sets[i] : null;
+        const setWeight = prevSet ? prevSet.weight : suggestedWeight;
+        addSetRow(ex.id, defaultReps, setWeight);
+      }
     }
   });
 
-  // RPE-muistutus footeriin (kerran, ei joka liikkeeseen)
-  updateLogNav();
+  // Jos jatketaan keskeneräistä, siirry siihen liikkeeseen mihin jäätiin
+  if (draftData && typeof draftData.lastStep === 'number') {
+    const step = Math.min(draftData.lastStep, totalLogSteps - 1);
+    showLogStep(step);
+  } else {
+    updateLogNav();
+  }
   document.getElementById('log-modal').style.display = 'flex';
 }
 
@@ -543,12 +602,14 @@ function showLogStep(stepIndex) {
 }
 
 function nextLogStep() {
+  saveDraft(); // välitallennus ennen siirtymää
   if (currentLogStep < totalLogSteps - 1) {
     showLogStep(currentLogStep + 1);
   }
 }
 
 function prevLogStep() {
+  saveDraft(); // välitallennus ennen siirtymää
   if (currentLogStep > 0) {
     showLogStep(currentLogStep - 1);
   }
@@ -579,7 +640,7 @@ function updateLogNav() {
 }
 
 // Lisää yksi sarjarivi liikkeelle
-function addSetRow(exId, prefillReps, prefillWeight) {
+function addSetRow(exId, prefillReps, prefillWeight, prefillRpe) {
   const container = document.getElementById('sets-' + exId);
   if (!container) return;
 
@@ -590,6 +651,7 @@ function addSetRow(exId, prefillReps, prefillWeight) {
   // Esitäyttö: käytä annettuja arvoja, tai kopioi edellisestä sarjasta
   let repsVal = prefillReps !== undefined ? prefillReps : '';
   let weightVal = prefillWeight !== undefined ? prefillWeight : '';
+  let rpeVal = (prefillRpe !== undefined && prefillRpe !== null) ? prefillRpe : '';
 
   // Jos ei annettu arvoja, kopioi edellisen sarjan arvot (nopeuttaa täyttöä)
   if (prefillReps === undefined && container.children.length > 0) {
@@ -602,7 +664,7 @@ function addSetRow(exId, prefillReps, prefillWeight) {
     <span class="set-num">${setNum}.</span>
     <input type="number" class="set-reps" value="${repsVal}" min="1" max="50" placeholder="—" />
     <input type="number" class="set-weight" value="${weightVal}" min="0" max="500" step="0.5" placeholder="—" />
-    <input type="number" class="set-rpe" min="1" max="10" step="0.5" placeholder="?" />
+    <input type="number" class="set-rpe" value="${rpeVal}" min="1" max="10" step="0.5" placeholder="?" />
   `;
   container.appendChild(row);
 }
@@ -732,7 +794,8 @@ function resetRestTimerUI() {
   }
 }
 
-async function submitLog() {
+// Kerää lomakkeen nykytila (käytetään sekä tallennuksessa että välitallennuksessa)
+function collectLogData() {
   const form = document.getElementById('log-form');
   const nextWorkout = form.dataset.workout;
   const today = new Date().toISOString().split('T')[0];
@@ -760,16 +823,40 @@ async function submitLog() {
     });
   });
 
-  const session = {
+  return {
     date: today,
     workout: nextWorkout,
     exercises: loggedExercises,
     timestamp: Date.now(),
+    lastStep: currentLogStep,
   };
+}
+
+// Välitallennus keskeneräiselle treenille (erillään valmiista treeneistä)
+function saveDraft() {
+  try {
+    const draft = collectLogData();
+    localStorage.setItem('workoutDraft', JSON.stringify(draft));
+  } catch (e) { /* ohita tallennusvirhe */ }
+}
+
+function getDraft() {
+  const d = localStorage.getItem('workoutDraft');
+  return d ? JSON.parse(d) : null;
+}
+
+function clearDraft() {
+  localStorage.removeItem('workoutDraft');
+}
+
+async function submitLog() {
+  const session = collectLogData();
+  delete session.lastStep; // valmiiseen treeniin ei tarvita askelmerkintää
 
   const sessions = getSessions();
   sessions.push(session);
   saveSessions(sessions);
+  clearDraft(); // treeni valmis — poista keskeneräinen
 
   closeLogModal();
   await analyzeSession(session, sessions);
