@@ -5,6 +5,39 @@ Uusin versio on aina ylimpänä.
 
 ---
 
+## v2.9 — 2.9.2026
+
+**Koontipäivitys: kolme bugikorjausta kahden treenikerran käyttökokemuksen pohjalta.**
+
+**Bugi A korjattu — Lankun yksikkö:**
+- Aikaperustaisilla liikkeillä (lankku, sivulankku) kirjauskentässä luki väärin "Toistot"
+- Nyt niiden kohdalla lukee "Sekunnit"
+- Historiassa ja valmentajan tiedoissa lankku näkyy nyt muodossa "30s, 30s" eikä "0×30"
+
+**Bugi B korjattu — Ajastin toimii nyt taustalla:**
+- Ennen: jos vaihdoit sovelluksesta pois (esim. Spotify), ajastin pysähtyi
+- Nyt: ajastin perustuu kellonaikaan, joten se "juoksee" myös taustalla
+- Kun palaat sovellukseen, näet oikean jäljellä olevan ajan — tai perustilan jos lepo jo loppui
+- Toimii koska laskenta perustuu kellonaikaan, ei sekunti-kerrallaan laskuriin (jonka iOS jäädyttää)
+
+**Bugi C korjattu — Valmentajan kommentit tallentuvat:**
+- Ennen: valmentajan analyysi/vastaus katosi kun näkymä suljettiin
+- Nyt: kaikki valmentajan vastaukset tallentuvat ja näkyvät Valmentaja-välilehden "Aiemmat kommentit" -osiossa
+- Jokainen kommentti on otsikoitu lähteen mukaan:
+  - "Treenianalyysi" (vihreä) = treenin jälkeinen analyysi
+  - "Kysymys valmentajalle" (sininen) = itse kysymäsi (näyttää myös kysymyksen)
+- Uusin ylimpänä, päivämäärän kanssa. Kaikki kommentit säilytetään.
+
+**Sivutuote:**
+- Korjattu Valmentaja-välilehden treenijako-teksti, joka näytti vielä vanhoja liikkeitä (Push/Pull). Nyt oikeat liikkeet.
+
+**Tekniset muutokset:**
+- Muokattu: app2.js (aikaperustaiset liikkeet, kellonaika-ajastin, kommenttihistoria)
+- Muokattu: index.html (kommenttihistoria-osio, korjattu treenijako-teksti)
+- Muokattu: style.css (kommenttihistorian tyylit)
+
+---
+
 ## v2.8 — 18.8.2026
 
 **"✓ Tallennettu" -välähdys (pieni käytettävyysparannus):**
