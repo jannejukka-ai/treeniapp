@@ -5,6 +5,24 @@ Uusin versio on aina ylimpänä.
 
 ---
 
+## v3.0.1 — 2.9.2026
+
+**Keskustelun työnkulku korjattu (käytettävyyskorjaus):**
+- Ongelma v3.0:ssa: kysymyskenttä oli erillään keskusteluikkunasta, eikä chatissa voinut jatkaa keskustelua suoraan — piti vierittää takaisin ylös erilliseen kenttään
+- Korjaus: kirjoituskenttä on nyt keskusteluikkunan sisällä, sen alalaidassa (kuten tavallisessa chat-sovelluksessa)
+- Näet keskustelun ja voit vastata jatkokysymyksellä samassa paikassa
+- Enter lähettää viestin, Shift+Enter tekee rivinvaihdon
+- Pyöreä lähetysnappi (↑) kentän vieressä
+- Poistettu erillinen "Kirjoita oma kysymys" -kortti (yhdistetty chattiin)
+- Pikakysymys-napit säilyvät aiheen aloitukseen
+
+**Tekniset muutokset:**
+- Muokattu: index.html (chat-kenttä keskusteluun, erillinen kortti pois)
+- Muokattu: app2.js (Enter-lähetys, päivitetty empty-state-ohje)
+- Muokattu: style.css (chat-kentän ja lähetysnapin tyylit)
+
+---
+
 ## v3.0 — 2.9.2026
 
 **AI-valmentajan keskustelumuisti (iso uusi ominaisuus):**
