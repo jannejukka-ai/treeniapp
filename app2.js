@@ -148,7 +148,7 @@ function showPage(name) {
   const tab = document.querySelector(`.tab[data-page="${name}"]`);
   if (tab) tab.classList.add('active');
   if (name === 'history') renderHistory();
-  if (name === 'coach') renderCoachHistory();
+  if (name === 'coach') { renderCoachHistory(); renderActiveConversation(); }
 }
 
 // ============================================================
@@ -1009,18 +1009,26 @@ Ole täsmällinen ja käytännöllinen. Vastaa suomeksi. Pidä vastaus lyhyenä.
   }
 }
 
-async function askCoach(question) {
-  const apiKey = getApiKey();
-  if (!apiKey) {
-    showCoachAnswer('Lisää API-avain asetuksista ensin.');
-    return;
-  }
+// ============================================================
+// KESKUSTELUMUISTI (valmentaja muistaa nykyisen keskustelun)
+// ============================================================
+function getActiveConversation() {
+  return JSON.parse(localStorage.getItem('activeConversation') || '[]');
+}
+function saveActiveConversation(messages) {
+  localStorage.setItem('activeConversation', JSON.stringify(messages));
+}
+function clearActiveConversation() {
+  localStorage.removeItem('activeConversation');
+  renderActiveConversation();
+}
 
+// Rakenna kiinteä konteksti (profiili + treenijako + historia) — mukana joka keskustelussa
+function buildCoachContext() {
   const sessions = getSessions();
   const plan = getPlan();
   const nextWorkout = getNextWorkout();
 
-  // Kerro valmentajalle nykyinen treenijako, jotta se voi ehdottaa muutoksia
   const currentPlanText = `
 Nykyinen ${plan[nextWorkout].name}:
 ${plan[nextWorkout].exercises.map((e, i) => `${i + 1}. ${e.name} (${e.sets}×${e.reps})`).join('\n')}
@@ -1035,23 +1043,43 @@ ${plan[nextWorkout].exercises.map((e, i) => `${i + 1}. ${e.name} (${e.sets}×${e
     }).join('; ')}`
   ).join('\n');
 
+  return `${PROFILE}
+${currentPlanText}
+Viimeiset treenikertasi:
+${historyText || 'Ei vielä treenikertoja kirjattuna.'}`;
+}
+
+async function askCoach(question) {
+  const apiKey = getApiKey();
+  if (!apiKey) {
+    showCoachAnswer('Lisää API-avain asetuksista ensin.');
+    return;
+  }
+
+  // Hae käynnissä oleva keskustelu ja lisää uusi kysymys
+  const conversation = getActiveConversation();
+  conversation.push({ role: 'user', content: question });
+  saveActiveConversation(conversation);
+  renderActiveConversation();
+
   showLoading('Valmentaja miettii...');
 
-  const prompt = `
-Olet kokenut personal trainer. Vastaa käyttäjän kysymykseen lyhyesti ja käytännöllisesti suomeksi.
+  // Kiinteä konteksti + ohjeet menevät system-kenttään (ei kulu keskusteluun)
+  const context = buildCoachContext();
+  const systemInstructions = `Olet kokenut personal trainer. Vastaa käyttäjän kysymyksiin lyhyesti ja käytännöllisesti suomeksi. Muistat tämän keskustelun aiemmat viestit ja voit viitata niihin.
 
-${PROFILE}
+${context}
 
-${currentPlanText}
+Jos ehdotat liikkeen vaihtoa, mainitse selkeästi mikä liike korvataan millä, ja muistuta että vaihdon voi tehdä "Vaihda"-napista treenilistassa. Vastaa max 160 sanalla. Ole konkreettinen ja selkeä.`;
 
-Viimeiset treenikertasi:
-${historyText || 'Ei vielä treenikertoja kirjattuna.'}
-
-Käyttäjän kysymys: ${question}
-
-Jos ehdotat liikkeen vaihtoa, mainitse selkeästi mikä liike korvataan millä. Muistuta käyttäjää että hän voi tehdä vaihdon "Vaihda"-napista treenilistassa.
-Vastaa max 160 sanalla. Ole konkreettinen ja selkeä.
-`;
+  // Lähetä enintään 20 viimeisintä viestiä API:lle (kustannus & koko hallinnassa).
+  // Koko keskustelu säilyy näytöllä, mutta valmentaja "muistaa" ~10 viimeistä vaihtoa.
+  let recentMessages = conversation.slice(-20);
+  // API vaatii että ketju alkaa user-viestillä — pudota mahdollinen alusta alkava assistant-viesti
+  while (recentMessages.length > 0 && recentMessages[0].role !== 'user') {
+    recentMessages = recentMessages.slice(1);
+  }
+  const apiMessages = recentMessages.map(m => ({ role: m.role, content: m.content }));
 
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -1065,7 +1093,8 @@ Vastaa max 160 sanalla. Ole konkreettinen ja selkeä.
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
         max_tokens: 400,
-        messages: [{ role: 'user', content: prompt }],
+        system: systemInstructions,
+        messages: apiMessages,
       }),
     });
 
@@ -1074,13 +1103,21 @@ Vastaa max 160 sanalla. Ole konkreettinen ja selkeä.
 
     if (data.content && data.content[0]) {
       const answer = data.content[0].text;
+      conversation.push({ role: 'assistant', content: answer });
+      saveActiveConversation(conversation);
+      renderActiveConversation();
       saveCoachComment(answer, 'kysymys', question);
-      showCoachAnswer(answer);
     } else {
+      conversation.pop(); // poista vajaa kysymys
+      saveActiveConversation(conversation);
+      renderActiveConversation();
       showCoachAnswer('Virhe: ' + (data.error?.message || 'tuntematon virhe'));
     }
   } catch (err) {
     hideLoading();
+    conversation.pop();
+    saveActiveConversation(conversation);
+    renderActiveConversation();
     showCoachAnswer('Yhteysvirhe: ' + err.message);
   }
 }
@@ -1098,6 +1135,34 @@ function showCoachAnswer(text) {
   card.style.display = 'block';
   el.textContent = text;
   card.scrollIntoView({ behavior: 'smooth' });
+}
+
+// Näytä käynnissä oleva keskustelu chatti-tyyliin
+function renderActiveConversation() {
+  const container = document.getElementById('coach-conversation');
+  const newBtn = document.getElementById('new-conversation-btn');
+  if (!container) return;
+
+  const conversation = getActiveConversation();
+
+  if (conversation.length === 0) {
+    container.innerHTML = '<p class="empty-state">Ei käynnissä olevaa keskustelua. Kysy valmentajalta jotain — se muistaa mitä juuri keskustelitte, joten voit esittää jatkokysymyksiä.</p>';
+    if (newBtn) newBtn.style.display = 'none';
+    return;
+  }
+
+  if (newBtn) newBtn.style.display = 'block';
+  container.innerHTML = '';
+  conversation.forEach(m => {
+    const bubble = document.createElement('div');
+    bubble.className = m.role === 'user' ? 'chat-bubble chat-user' : 'chat-bubble chat-coach';
+    bubble.innerHTML = `
+      <div class="chat-role">${m.role === 'user' ? 'Sinä' : 'Valmentaja'}</div>
+      <div class="chat-text">${escapeHtml(m.content)}</div>
+    `;
+    container.appendChild(bubble);
+  });
+  container.scrollTop = container.scrollHeight;
 }
 
 // ============================================================
