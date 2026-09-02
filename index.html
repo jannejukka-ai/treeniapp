@@ -85,7 +85,7 @@
       </div>
 
       <div class="card">
-        <div class="card-label">Kysy valmentajalta</div>
+        <div class="card-label">Aloita kysymys aiheesta</div>
         <div class="quick-questions">
           <button class="q-btn" onclick="askCoach('Selkäni on kipeä tänään. Mitkä liikkeet ovat turvallisia ja mitä pitäisi välttää?')">Selkä on kipeä tänään</button>
           <button class="q-btn" onclick="askCoach('En ole treenannut 2 viikkoon. Miten palaan harjoitteluun turvallisesti?')">Olen ollut tauolla 2 viikkoa</button>
@@ -93,12 +93,6 @@
           <button class="q-btn" onclick="askCoach('Polvi on hieman arka. Mitkä jalkaliikkeet ovat turvallisia?')">Polvi on arka</button>
           <button class="q-btn" onclick="askCoach('Analysoi treenini viimeisen kuukauden ajalta ja kerro edistymisestäni.')">Analysoi edistymiseni</button>
         </div>
-      </div>
-
-      <div class="card">
-        <div class="card-label">Kirjoita oma kysymys</div>
-        <textarea id="custom-question" class="textarea" placeholder="Esim. Miten voin parantaa penkkipunnerrustekniikkaani?"></textarea>
-        <button class="btn-primary" onclick="askCustomQuestion()">Lähetä kysymys</button>
       </div>
 
       <div class="card" id="coach-answer-card" style="display:none;">
@@ -112,6 +106,10 @@
           <button class="new-conv-btn" id="new-conversation-btn" onclick="clearActiveConversation()" style="display:none;">Aloita uusi</button>
         </div>
         <div id="coach-conversation" class="coach-conversation"></div>
+        <div class="chat-input-row">
+          <textarea id="custom-question" class="chat-input" rows="1" placeholder="Kirjoita kysymys tai jatka keskustelua..."></textarea>
+          <button class="chat-send-btn" id="chat-send-btn" onclick="askCustomQuestion()" aria-label="Lähetä">↑</button>
+        </div>
       </div>
 
       <div class="card">
@@ -187,7 +185,7 @@
     </div>
   </main>
 
-  <footer class="app-footer">Treeniapp v3.0</footer>
+  <footer class="app-footer">Treeniapp v3.0.1</footer>
 
 </div>
 
