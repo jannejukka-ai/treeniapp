@@ -5,6 +5,37 @@ Uusin versio on aina ylimpänä.
 
 ---
 
+## v3.0 — 2.9.2026
+
+**AI-valmentajan keskustelumuisti (iso uusi ominaisuus):**
+- Valmentaja muistaa nyt käynnissä olevan keskustelun ja osaa vastata jatkokysymyksiin
+- Ennen: jokainen kysymys oli erillinen — valmentaja ei muistanut edellistä. Esim. "Selkä kipeä" → vastaus → "Entä huomenna?" ei toiminut.
+- Nyt: voit esittää jatkokysymyksiä luontevasti, valmentaja pysyy kartalla aiheesta
+- Keskustelu näkyy chatti-tyylisenä Valmentaja-välilehdellä (sinun viestit oikealla, valmentajan vasemmalla)
+
+**"Aloita uusi" -nappi:**
+- Kun haluat vaihtaa aihetta, paina "Aloita uusi" — keskustelu alkaa puhtaalta pöydältä
+- Sinä päätät milloin nollataan
+
+**Tärkeää — mitä säilyy aina:**
+- Suuret linjat (tavoitteet, selkä/olkapää-rajoitteet, treenijako, historia) ovat AINA valmentajan tiedossa, myös uuden keskustelun jälkeen — ne eivät nollaudu
+- Vanhat vastaukset säilyvät pysyvästi "Aiemmat kommentit" -listassa (v2.9:n järjestelmä)
+- Nollaus koskee vain lyhyen aikavälin keskustelulankaa
+
+**Suunnitteluvalinnat:**
+- Treenianalyysit (treenin jälkeen) pysyvät erillisinä keskustelusta — ne eivät sekoitu kysymyskeskusteluun
+- Valmentaja muistaa enintään ~20 viimeisintä viestiä (kustannus ja koko hallinnassa); koko keskustelu säilyy näytöllä
+
+**Tekninen huomio kustannuksista:**
+- Koska koko keskustelu lähetetään joka kysymyksessä, yksittäinen kysymys kuluttaa hieman enemmän API-krediittiä kuin ennen. Määrä on silti pieni.
+
+**Tekniset muutokset:**
+- Muokattu: app2.js (viestiketju API:lle, keskustelun tallennus, chatti-näkymä)
+- Muokattu: index.html (keskustelunäkymä, "Aloita uusi" -nappi)
+- Muokattu: style.css (chatti-kuplien tyylit)
+
+---
+
 ## v2.9.1 — 2.9.2026
 
 **Versionumero näkyviin (pieni lisäys):**
