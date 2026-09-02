@@ -3,6 +3,8 @@
 Tähän tiedostoon on kirjattu tulevia ominaisuuksia ja kehityskohteita joita ei ole vielä toteutettu.
 Kun jokin kohta rakennetaan, se siirretään CHANGELOG-tiedostoon valmiina versiona.
 
+**MUISTA jokaisessa versiopäivityksessä:** päivitä versionumero myös index.html:n footeriin (teksti "Treeniapp v2.9.1"). Se ei päivity automaattisesti.
+
 ---
 
 ## VALMIS ✅ — v2.9 koontipäivitys (toteutettu 2.9.2026)
