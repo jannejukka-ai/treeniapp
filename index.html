@@ -102,8 +102,16 @@
       </div>
 
       <div class="card" id="coach-answer-card" style="display:none;">
-        <div class="card-label">Valmentajan vastaus</div>
+        <div class="card-label">Huom</div>
         <p class="coach-answer-text" id="coach-answer-text"></p>
+      </div>
+
+      <div class="card">
+        <div class="coach-conv-header">
+          <div class="card-label" style="margin-bottom:0;">Keskustelu valmentajan kanssa</div>
+          <button class="new-conv-btn" id="new-conversation-btn" onclick="clearActiveConversation()" style="display:none;">Aloita uusi</button>
+        </div>
+        <div id="coach-conversation" class="coach-conversation"></div>
       </div>
 
       <div class="card">
@@ -179,7 +187,7 @@
     </div>
   </main>
 
-  <footer class="app-footer">Treeniapp v2.9.1</footer>
+  <footer class="app-footer">Treeniapp v3.0</footer>
 
 </div>
 
