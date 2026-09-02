@@ -708,3 +708,44 @@ body {
   line-height: 1.5;
   white-space: pre-wrap;
 }
+
+/* Chatin kirjoituskenttä */
+.chat-input-row {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+}
+.chat-input {
+  flex: 1;
+  padding: 10px 12px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: 15px;
+  font-family: inherit;
+  resize: none;
+  max-height: 120px;
+  line-height: 1.4;
+}
+.chat-input:focus { outline: none; border-color: var(--accent); }
+.chat-send-btn {
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: none;
+  color: #fff;
+  font-size: 20px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.chat-send-btn:hover { background: var(--accent-light); }
+.chat-send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
