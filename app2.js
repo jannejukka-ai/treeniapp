@@ -148,6 +148,7 @@ function showPage(name) {
   const tab = document.querySelector(`.tab[data-page="${name}"]`);
   if (tab) tab.classList.add('active');
   if (name === 'history') renderHistory();
+  if (name === 'coach') renderCoachHistory();
 }
 
 // ============================================================
@@ -259,12 +260,17 @@ function renderExerciseList(workoutKey, plan, sessions) {
   list.appendChild(addRow);
 }
 
+// Aikaperustaiset liikkeet (mitataan sekunneissa, ei toistoina)
+const TIME_BASED_EXERCISES = ['plank', 'splank'];
+function isTimeBased(exerciseId) {
+  return TIME_BASED_EXERCISES.includes(exerciseId);
+}
+
 function suggestNextWeight(exerciseId, lastEx, baseWeight) {
   const w = parseFloat(baseWeight) || 0;
   if (w === 0) return 0;
   // Aikaperustaiset core-liikkeet (lankku ym.): ei automaattista painonlisäystä
-  const timeBased = ['plank', 'splank'];
-  if (timeBased.includes(exerciseId)) return w;
+  if (isTimeBased(exerciseId)) return w;
   if (exerciseId === 'bench') return w + 2.5;
   return w + 2.5;
 }
@@ -284,11 +290,19 @@ function analyzeSetDirection(sets) {
   return 'vaihteleva';
 }
 
-// Muotoile sarjat luettavaan muotoon (esim. "80×5, 90×5, 92.5×5")
-function formatSets(sets) {
+// Muotoile sarjat luettavaan muotoon (esim. "80×5, 90×5" tai lankulle "30s, 30s")
+function formatSets(sets, exerciseId) {
   if (!sets || sets.length === 0) return '—';
+  const timeBased = exerciseId && isTimeBased(exerciseId);
   return sets.map(s => {
-    let str = (s.weight || 0) + '×' + (s.reps || 0);
+    let str;
+    if (timeBased) {
+      // Aikaperustainen: näytä sekunnit (reps-kenttä sisältää sekunnit)
+      str = (s.reps || 0) + 's';
+      if (s.weight > 0) str += ' +' + s.weight + 'kg'; // painotettu lankku
+    } else {
+      str = (s.weight || 0) + '×' + (s.reps || 0);
+    }
     if (s.rpe) str += ' (RPE' + s.rpe + ')';
     return str;
   }).join(', ');
@@ -525,7 +539,7 @@ function openLogModalWithData(draftData) {
     // Edellisen kerran suoritus muistin tueksi
     let lastTimeHtml = '';
     if (lastEx && lastEx.sets && lastEx.sets.length > 0) {
-      lastTimeHtml = `<div class="log-last-time">Viime kerralla: ${formatSets(lastEx.sets)}</div>`;
+      lastTimeHtml = `<div class="log-last-time">Viime kerralla: ${formatSets(lastEx.sets, ex.id)}</div>`;
     } else if (lastEx && lastEx.actualWeight) {
       lastTimeHtml = `<div class="log-last-time">Viime kerralla: ${lastEx.actualWeight} kg</div>`;
     }
@@ -535,12 +549,12 @@ function openLogModalWithData(draftData) {
         <span class="log-step-counter">Liike ${exIndex + 1}/${totalLogSteps}</span>
       </div>
       <div class="log-ex-name">${ex.name}</div>
-      <div class="log-ex-target">Tavoite: ${ex.reps}${ex.weight > 0 ? ' @ ' + suggestedWeight + ' kg (raskain sarja)' : ''}</div>
+      <div class="log-ex-target">Tavoite: ${ex.reps}${(ex.weight > 0 && !isTimeBased(ex.id)) ? ' @ ' + suggestedWeight + ' kg (raskain sarja)' : ''}</div>
       ${lastTimeHtml}
       ${exIndex === 0 ? '<div class="rpe-hint">RPE = kuinka raskas sarja oli (1–10). 10 = maksimi, 8 = 2 toistoa jäi varaan. Vapaaehtoinen.</div>' : ''}
       <div class="sets-header">
         <span class="sets-col-label">Sarja</span>
-        <span class="sets-col-label">Toistot</span>
+        <span class="sets-col-label">${isTimeBased(ex.id) ? 'Sekunnit' : 'Toistot'}</span>
         <span class="sets-col-label">Paino (kg)</span>
         <span class="sets-col-label">RPE</span>
       </div>
@@ -686,11 +700,12 @@ function closeLogModal() {
 }
 
 // ============================================================
-// LEPOAJASTIN
+// LEPOAJASTIN (kellonaikaan perustuva — kestää taustalle siirtymisen)
 // ============================================================
 const REST_DEFAULT_SECONDS = 90; // oletus 1:30
-let restRemaining = REST_DEFAULT_SECONDS;
-let restInterval = null;
+let restEndTime = null;   // kellonaika (ms) jolloin lepo loppuu
+let restInterval = null;  // näytön päivitys sekunnin välein
+let restActive = false;   // onko ajastin käynnissä
 let wakeLock = null;
 
 // Muotoile sekunnit muotoon M:SS
@@ -701,23 +716,26 @@ function formatRestTime(totalSeconds) {
   return m + ':' + (s < 10 ? '0' : '') + s;
 }
 
+// Montako sekuntia lepoa on jäljellä (laskettu kellonajasta)
+function getRestSecondsLeft() {
+  if (!restEndTime) return 0;
+  return Math.round((restEndTime - Date.now()) / 1000);
+}
+
 // Pyydä näyttöä pysymään päällä (Wake Lock)
 async function requestWakeLock() {
   try {
     if ('wakeLock' in navigator) {
       wakeLock = await navigator.wakeLock.request('screen');
-      // Jos näyttö menee pois ja takaisin, Wake Lock voi vapautua — pyydä uudelleen
       wakeLock.addEventListener('release', () => {
         wakeLock = null;
       });
     }
   } catch (err) {
-    // Wake Lock ei tuettu tai epäonnistui — ajastin toimii silti kun näyttö on päällä
     wakeLock = null;
   }
 }
 
-// Vapauta Wake Lock
 async function releaseWakeLock() {
   try {
     if (wakeLock) {
@@ -731,44 +749,53 @@ async function releaseWakeLock() {
 
 // Käynnistä lepoajastin
 function startRestTimer() {
-  restRemaining = REST_DEFAULT_SECONDS;
+  restEndTime = Date.now() + REST_DEFAULT_SECONDS * 1000;
+  restActive = true;
 
   document.getElementById('rest-timer-idle').style.display = 'none';
   document.getElementById('rest-timer-active').style.display = 'block';
 
   const display = document.getElementById('rest-time-display');
-  display.textContent = formatRestTime(restRemaining);
   display.classList.remove('rest-done');
+  updateRestDisplay();
 
   requestWakeLock();
 
   if (restInterval) clearInterval(restInterval);
-  restInterval = setInterval(() => {
-    restRemaining--;
-    display.textContent = formatRestTime(restRemaining);
+  restInterval = setInterval(updateRestDisplay, 250); // päivitä 4×/s tarkkuuden vuoksi
+}
 
-    if (restRemaining <= 0) {
-      // Aika loppui — visuaalinen hälytys, ei ääntä
-      clearInterval(restInterval);
-      restInterval = null;
-      display.textContent = 'Valmis!';
-      display.classList.add('rest-done');
-      releaseWakeLock();
-      // Palaa idle-tilaan 3 sekunnin kuluttua
-      setTimeout(() => {
-        resetRestTimerUI();
-      }, 3000);
-    }
-  }, 1000);
+// Päivitä näyttö kellonajan perusteella (toimii myös palatessa taustalta)
+function updateRestDisplay() {
+  if (!restActive) return;
+  const display = document.getElementById('rest-time-display');
+  if (!display) return;
+
+  const left = getRestSecondsLeft();
+
+  if (left > 0) {
+    display.textContent = formatRestTime(left);
+    display.classList.remove('rest-done');
+  } else {
+    // Aika loppui — visuaalinen hälytys, ei ääntä
+    if (restInterval) { clearInterval(restInterval); restInterval = null; }
+    display.textContent = 'Valmis!';
+    display.classList.add('rest-done');
+    releaseWakeLock();
+    restActive = false;
+    // Palaa idle-tilaan 3 sekunnin kuluttua
+    setTimeout(() => { resetRestTimerUI(); }, 3000);
+  }
 }
 
 // Säädä lepoaikaa lennossa (+/- sekuntia)
 function adjustRestTimer(delta) {
-  restRemaining += delta;
-  if (restRemaining < 5) restRemaining = 5; // ei mene liian pieneksi
-  if (restRemaining > 600) restRemaining = 600; // max 10 min
-  const display = document.getElementById('rest-time-display');
-  if (display) display.textContent = formatRestTime(restRemaining);
+  if (!restEndTime) return;
+  let left = getRestSecondsLeft() + delta;
+  if (left < 5) left = 5;      // ei mene liian pieneksi
+  if (left > 600) left = 600;  // max 10 min
+  restEndTime = Date.now() + left * 1000;
+  updateRestDisplay();
 }
 
 // Pysäytä ajastin (Ohita-nappi tai modaalin sulku)
@@ -777,6 +804,8 @@ function stopRestTimer() {
     clearInterval(restInterval);
     restInterval = null;
   }
+  restActive = false;
+  restEndTime = null;
   releaseWakeLock();
   resetRestTimerUI();
 }
@@ -793,6 +822,15 @@ function resetRestTimerUI() {
     display.textContent = formatRestTime(REST_DEFAULT_SECONDS);
   }
 }
+
+// Kun sovellus palaa näkyviin (esim. Spotifysta takaisin), päivitä ajastin heti
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && restActive) {
+    updateRestDisplay();
+    // Wake Lock vapautuu kun sovellus on taustalla — pyydä uudelleen jos lepo yhä kesken
+    if (getRestSecondsLeft() > 0) requestWakeLock();
+  }
+});
 
 // Kerää lomakkeen nykytila (käytetään sekä tallennuksessa että välitallennuksessa)
 function collectLogData() {
@@ -892,7 +930,7 @@ async function analyzeSession(session, allSessions) {
     const exText = s.exercises.map(e => {
       // Uusi sarjaformaatti tai vanha
       if (e.sets && e.sets.length > 0) {
-        return `${e.name}: ${formatSets(e.sets)} [${analyzeSetDirection(e.sets)}]${e.note ? ' (' + e.note + ')' : ''}`;
+        return `${e.name}: ${formatSets(e.sets, e.id)} [${analyzeSetDirection(e.sets)}]${e.note ? ' (' + e.note + ')' : ''}`;
       }
       return `${e.name}: ${e.actualWeight || 0}kg${e.rpe ? ' RPE' + e.rpe : ''}${e.note ? ' (' + e.note + ')' : ''}`;
     }).join('; ');
@@ -901,7 +939,7 @@ async function analyzeSession(session, allSessions) {
 
   const todayText = session.exercises.map(e => {
     if (e.sets && e.sets.length > 0) {
-      return `- ${e.name}: ${formatSets(e.sets)} · sarjojen suunta: ${analyzeSetDirection(e.sets)}${e.note ? ' · huomio: ' + e.note : ''}`;
+      return `- ${e.name}: ${formatSets(e.sets, e.id)} · sarjojen suunta: ${analyzeSetDirection(e.sets)}${e.note ? ' · huomio: ' + e.note : ''}`;
     }
     return `- ${e.name}: ${e.actualWeight || 0}kg${e.note ? ' · huomio: ' + e.note : ''}`;
   }).join('\n');
@@ -958,7 +996,9 @@ Ole täsmällinen ja käytännöllinen. Vastaa suomeksi. Pidä vastaus lyhyenä.
     hideLoading();
 
     if (data.content && data.content[0]) {
-      showCoachAnswer(data.content[0].text);
+      const answer = data.content[0].text;
+      saveCoachComment(answer, 'analyysi', 'Treeni ' + session.workout);
+      showCoachAnswer(answer);
       showPage('coach');
     } else {
       showCoachAnswer('Treeni kirjattu! API-virhe: ' + (data.error?.message || 'tuntematon virhe'));
@@ -989,7 +1029,7 @@ ${plan[nextWorkout].exercises.map((e, i) => `${i + 1}. ${e.name} (${e.sets}×${e
   const historyText = sessions.slice(-5).map(s =>
     `${s.date}: ${s.exercises.map(e => {
       if (e.sets && e.sets.length > 0) {
-        return `${e.name} ${formatSets(e.sets)}`;
+        return `${e.name} ${formatSets(e.sets, e.id)}`;
       }
       return `${e.name} ${e.actualWeight || 0}kg`;
     }).join('; ')}`
@@ -1033,7 +1073,9 @@ Vastaa max 160 sanalla. Ole konkreettinen ja selkeä.
     hideLoading();
 
     if (data.content && data.content[0]) {
-      showCoachAnswer(data.content[0].text);
+      const answer = data.content[0].text;
+      saveCoachComment(answer, 'kysymys', question);
+      showCoachAnswer(answer);
     } else {
       showCoachAnswer('Virhe: ' + (data.error?.message || 'tuntematon virhe'));
     }
@@ -1056,6 +1098,70 @@ function showCoachAnswer(text) {
   card.style.display = 'block';
   el.textContent = text;
   card.scrollIntoView({ behavior: 'smooth' });
+}
+
+// ============================================================
+// VALMENTAJAN KOMMENTTIEN HISTORIA
+// ============================================================
+function getCoachHistory() {
+  return JSON.parse(localStorage.getItem('coachHistory') || '[]');
+}
+
+// Tallenna valmentajan vastaus. type: 'analyysi' tai 'kysymys'
+function saveCoachComment(text, type, context) {
+  // Älä tallenna virheilmoituksia tai API-avain-muistutuksia
+  if (!text || text.startsWith('Virhe') || text.startsWith('Yhteysvirhe') ||
+      text.includes('Lisää API-avain') || text.includes('API-virhe')) {
+    return;
+  }
+  const history = getCoachHistory();
+  history.push({
+    text: text,
+    type: type, // 'analyysi' = treenin jälkeen, 'kysymys' = käyttäjän kysymys
+    context: context || '', // esim. kysymyksen aihe tai treenin tunnus
+    date: new Date().toISOString().split('T')[0],
+    timestamp: Date.now(),
+  });
+  localStorage.setItem('coachHistory', JSON.stringify(history));
+}
+
+// Näytä valmentajan kommenttihistoria Valmentaja-välilehdellä
+function renderCoachHistory() {
+  const container = document.getElementById('coach-history');
+  if (!container) return;
+  const history = getCoachHistory();
+
+  if (history.length === 0) {
+    container.innerHTML = '<p class="empty-state">Ei vielä valmentajan kommentteja. Kirjaa treeni tai kysy valmentajalta — vastaukset tallentuvat tänne.</p>';
+    return;
+  }
+
+  container.innerHTML = '';
+  // Uusin ensin
+  [...history].reverse().forEach(c => {
+    const item = document.createElement('div');
+    item.className = 'coach-history-item';
+
+    const typeLabel = c.type === 'analyysi' ? 'Treenianalyysi' : 'Kysymys valmentajalle';
+    const typeClass = c.type === 'analyysi' ? 'tag-analysis' : 'tag-question';
+
+    item.innerHTML = `
+      <div class="coach-history-header">
+        <span class="coach-history-tag ${typeClass}">${typeLabel}</span>
+        <span class="coach-history-date">${formatDate(c.date)}</span>
+      </div>
+      ${c.context ? '<div class="coach-history-context">' + escapeHtml(c.context) + '</div>' : ''}
+      <div class="coach-history-text">${escapeHtml(c.text)}</div>
+    `;
+    container.appendChild(item);
+  });
+}
+
+// Pieni apufunktio: estä HTML-injektio tekstissä
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
 }
 
 // ============================================================
@@ -1082,7 +1188,7 @@ function renderHistory() {
       // Uusi sarjaformaatti tai vanha
       let detailStr, badgeStr;
       if (ex.sets && ex.sets.length > 0) {
-        detailStr = formatSets(ex.sets);
+        detailStr = formatSets(ex.sets, ex.id);
         const maxW = Math.max(...ex.sets.map(x => x.weight || 0));
         badgeStr = maxW + ' kg';
       } else {
