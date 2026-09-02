@@ -5,6 +5,15 @@ Uusin versio on aina ylimpänä.
 
 ---
 
+## v2.9.1 — 2.9.2026
+
+**Versionumero näkyviin (pieni lisäys):**
+- Lisätty pieni harmaa versioteksti sovelluksen alalaitaan (footer), näkyy kaikilla sivuilla
+- Hyöty: näet heti mikä versio on live — helpottaa deploy-varmistusta (jos footer näyttää vanhan numeron, deploy ei mennyt läpi tai välimuisti on vanha)
+- Muokattu: index.html (footer-elementti), style.css (footer-tyyli)
+
+---
+
 ## v2.9 — 2.9.2026
 
 **Koontipäivitys: kolme bugikorjausta kahden treenikerran käyttökokemuksen pohjalta.**
