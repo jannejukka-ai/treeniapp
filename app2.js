@@ -1146,7 +1146,7 @@ function renderActiveConversation() {
   const conversation = getActiveConversation();
 
   if (conversation.length === 0) {
-    container.innerHTML = '<p class="empty-state">Ei käynnissä olevaa keskustelua. Kysy valmentajalta jotain — se muistaa mitä juuri keskustelitte, joten voit esittää jatkokysymyksiä.</p>';
+    container.innerHTML = '<p class="empty-state">Aloita kysymällä jotain — joko yllä olevista aiheista tai kirjoittamalla oma kysymys alle. Valmentaja muistaa keskustelun, joten voit esittää jatkokysymyksiä.</p>';
     if (newBtn) newBtn.style.display = 'none';
     return;
   }
@@ -1344,4 +1344,15 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('api-key-input').value = savedKey;
   }
   renderHome();
+
+  // Chat-kenttä: Enter lähettää, Shift+Enter tekee rivinvaihdon
+  const chatInput = document.getElementById('custom-question');
+  if (chatInput) {
+    chatInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        askCustomQuestion();
+      }
+    });
+  }
 });
