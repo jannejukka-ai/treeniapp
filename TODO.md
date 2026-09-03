@@ -15,6 +15,33 @@ Valmentaja muistaa nyt käynnissä olevan keskustelun ja osaa vastata jatkokysym
 
 ## PIPELINE — seuraavat kehityskohteet (käyttäjän priorisoima järjestys)
 
+**0. TREENIOHJELMAN TARKISTUS ortopedin löydösten pohjalta (TERVEYSPRIORITEETTI — käsitellään ennen muita)**
+
+Käyttäjä kävi ortopedilla. Uudet löydökset:
+- Lanneranka L4-5: alkava välilevyongelma, madaltuneet välilevyt, spondyloosi
+- Rintaranka T8-9 (ja mahdollisesti T10): UUSI löydös — spondyloosinokat, jotka aiheuttavat ylävatsan ja kyljen kipuoiretta. Ärsyyntyvät maastavedosta ja pystypunnerruksesta/kyykystä.
+
+Ortopedin ohjeet:
+- POIS kokonaan: maastaveto JA kyykky (perusliikkeistä kaksi). [Nämä eivät jo ole ohjelmassa — kunnossa.]
+- HYVÄKSI todetut, rintarankaa avaavat / nikamien takaa keventävät liikkeet:
+  - Soutuliike (mutta huom: tarkista onko nykyinen KULMASOUTU liian alaselkää kuormittava etukumarassa — harkitse vaihtoa TUETTUUN soutuun, esim. taljasoutu istuen tai tuettu käsipainosoutu)
+  - Edestä tulevat taljaliikkeet (ylätalja on jo ohjelmassa — hyvä)
+  - Käsillä roikkuminen + polvien/jalkojen nosto rinnalle (EI vielä ohjelmassa — harkitse lisäystä; dekompressoi rankaa + core)
+  - Selkäpunnerruspenkin käyttö (EI vielä ohjelmassa — harkitse lisäystä)
+
+Tarkistuksen johtopäätös (Claude): ohjelma on jo suurelta osin linjassa, EI vaadi isoa remonttia. Kohdennetut hienosäädöt:
+1. Kulmasoutu → tuettu soutu (1 liikkeen vaihto, vähentää etukumaraa alaselkäkuormaa)
+2. Harkitse 1-2 ortopedin suosittelemaa liikettä lisää (roikkuminen + polvennosto; selkäpunnerruspenkki)
+3. PÄIVITÄ PROFILE-teksti app2.js:ssä uusilla löydöksillä (T8-9/T10 rintaranka, L4-5 lanneranka, kiellot: maastaveto/kyykky/pystypunnerrus, suositukset: rintarankaa avaavat liikkeet). Ilman tätä valmentaja ei tiedä uusista rajoitteista.
+4. Varmista ortopedilta erikseen: onko raskas PENKKIPUNNERRUS ok (lantion notko voi kuormittaa)? Ei todennäköinen ongelma, mutta hyvä tarkistaa.
+
+Tavoitteet pysyvät samoina kuin projektissa aiemmin (lihasmassa, voima, terveys, 2×/vko).
+HUOM: Claude ei ole lääkäri/fysioterapeutti — ortopedin ohjeet menevät aina edelle. Epäselvissä kohdissa kysy ortopedilta/fysioterapeutilta.
+
+- Työmääräarvio: pieni–keskitaso (muutama liikevaihto + profiilin päivitys)
+
+---
+
 **1. Pitkän aikavälin muisti + periodisaatio (YHDISTETTY KOKONAISUUS) — SEURAAVAKSI**
 
 Kaksi toisiinsa liittyvää ominaisuutta jotka rakennetaan yhdessä, koska molemmat vaativat saman perustan: valmentajan pääsyn pidempään historiaan ja kyvyn tunnistaa kuvioita sen yli.
