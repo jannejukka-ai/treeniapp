@@ -30,7 +30,7 @@ Uusin versio on aina ylimpänä.
 
 **Kirjausmerkintöjen selkeytys:**
 - Paino-merkintä automaattisesti liikkeen mukaan: kirjauksessa paino-otsikon alla pieni harmaa vihje siitä mitä paino tarkoittaa — "per käsi" (käsipainot), "yhteensä" (talja/tanko) tai "lisäpaino, tyhjä = kehon paino"
-- Merkintä päätellään liikkeen nimestä; käyttäjä voi tarvittaessa ylikirjoittaa sen liikekohtaisesti (turvaverkko)
+- Merkintä päätellään automaattisesti liikkeen nimestä. Automatiikka kattaa nykyiset liikkeet oikein (24 yksikkötestiä läpi). Jos jokin liike joskus arpoo väärin, se korjataan manuaalisesti koodiin liike kerrallaan (ei erillistä käsivalintaa sovelluksessa — koodissa on tälle valmis pohja, ex.weightMode)
 - Kehon paino -bugi korjattu: kehon paino -liikkeissä (punnerrus, leuanveto, dippi, roikkuminen) tyhjä painokenttä ei enää näytä harhaanjohtavaa "0×10". Nyt näkyy "kehon paino × 10" tai lisäpainolla "kehon paino +10kg × 8" — sekä historiassa että valmentajan analyysissä
 - Per käsi -merkintä näkyy historiassa käsipainoliikkeille (esim. "14×10 (/käsi)")
 - Aikaperustaiset liikkeet tunnistetaan nyt myös nimestä (lankku, sivulankku, lintukoira, kuollut hyönteinen, vuoristokiipeilijä), ei vain kiinteästä id:stä
