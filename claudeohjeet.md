@@ -49,6 +49,22 @@ Olemme kehittäneet toimivan työtavan. Noudata sitä ilman että minun tarvitse
 
 ---
 
+## JULKAISUKETJU — miten muutos päätyy koodista puhelimeen
+
+Tämä on koko työnkulku alusta loppuun. Ketju on tärkeä ymmärtää, koska Netlify seuraa GitHubia — siksi deploy-varmistus liittyy GitHub-päivitykseen.
+
+1. **Claude tekee muutokset** ja antaa valmiit tiedostot (present_files)
+2. **JJ päivittää tiedostot GitHubiin:** jokaiselle tiedostolle: klikkaa tiedosto → kynäikoni (Edit) → Ctrl+A → Delete → liitä uusi sisältö → Commit changes (Commit directly to main)
+3. **Netlify huomaa GitHub-muutoksen ja julkaisee automaattisesti** (ei vaadi JJ:ltä toimia — paitsi varmistuksen)
+4. **JJ varmistaa deployn:** Netlify → Deploys-välilehti → uusin deploy pitää näyttää "Published" (vihreä pallo). Jos deploy ei käynnisty itsestään tai epäonnistuu: Trigger deploy → "Deploy project without cache". (HUOM: JJ:llä on ollut token-katkoksia joiden takia deploy on jäänyt kesken — tämä varmistus on siksi tärkeä, ei valinnainen.)
+5. **JJ testaa:** avaa sovellus incognitossa TAI Cmd+Shift+R (ohittaa selaimen välimuistin) → tarkistaa että footerissa lukee uusi versionumero → kokeilee uutta ominaisuutta
+
+Nyrkkisääntö: kun footerin versionumero vastaa uusinta, päivitys on oikeasti mennyt läpi. Jos footer näyttää vanhaa, joko GitHub-päivitys tai Netlify-deploy on kesken.
+
+Ympäristö: koodi = GitHub (jannejukka-ai/treeniapp), julkaisu = Netlify (osoite muotoa xxx.netlify.app), AI-valmentaja = Anthropic API. JJ:llä on Netlifyssä maksullinen tili (n. 9€/kk, 3 kk puoleen hintaan).
+
+---
+
 ## TÄRKEÄÄ MINUSTA KÄYTTÄJÄNÄ (JJ)
 
 **Terveys / keho — KRIITTISTÄ ohjelman kannalta:**
