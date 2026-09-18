@@ -3,7 +3,7 @@
 Tähän tiedostoon on kirjattu tulevia ominaisuuksia ja kehityskohteita joita ei ole vielä toteutettu.
 Kun jokin kohta rakennetaan, se siirretään CHANGELOG-tiedostoon valmiina versiona.
 
-**MUISTA jokaisessa versiopäivityksessä:** päivitä versionumero myös index.html:n footeriin (teksti "Treeniapp v3.0.1"). Se ei päivity automaattisesti.
+**MUISTA jokaisessa versiopäivityksessä:** päivitä versionumero myös index.html:n footeriin (teksti "Treeniapp v3.1"). Se ei päivity automaattisesti.
 
 ---
 
@@ -29,6 +29,27 @@ Katso tarkemmat tiedot CHANGELOG:sta v3.1.
 ---
 
 ## PIPELINE — seuraavat kehityskohteet (käyttäjän priorisoima järjestys)
+
+---
+
+### 🎯 SEURAAVA VERSIO (v3.2) — sovittu kehitysjono (18.9.2026, JJ + Claude)
+
+Tämä lista koottiin v3.1:n jälkeen. Ehdotettu järjestys: kevyet ja terveysrelevantit ensin.
+
+1. **Toistojen per-puoli-erittely** (JJ:n toive). Sivulankku, lintukoira, dead bug ym. yksipuoliset: mahdollisuus merkitä toistot "per puoli" (repMode = 'per-puoli'). Paino-puoli hoidettu jo v3.1:ssä, tämä on toistojen vastaava lisä. Rajattu, selkeä. Prioriteetti: korkea.
+
+2. **Progressioehdotus fiksummaksi per liiketyyppi** (Clauden bongaus). Nyt `suggestNextWeight` ehdottaa +2,5 kg kaikille. Käsipainoliikkeissä (Arnold press, vasarakääntö) se on käytännössä +5 kg kokonaiskuormaa, ja käsipainot nousevat usein 2 kg pykälin. Ehdotus voisi olla liiketyyppikohtainen (käsipaino per käsi = pienempi askel). Pieni, terveysrelevantti. Prioriteetti: korkea.
+
+3. **Historia-seuranta muillekin liikkeille kuin penkki** (Clauden bongaus). Nyt Historia-sivun kehityskaavio on kovakoodattu vain id:hen 'bench'. Laajennus: valittava mitä liikettä seuraa (esim. Arnold press, tuettu soutu). Tukee uutta terveys-ensin-tavoitetta. Keskisuuri. Prioriteetti: keskitaso.
+
+4. **Paino-merkinnän käsivalinta käyttöliittymään** (JJ:n kysymys + Clauden vastaus). Automatiikka riittää nyt; tämä tehdään VAIN jos automatiikka osoittautuu riittämättömäksi. Toteutustapa selvitetty: valinta tulee LIIKKEENVAIHTO-IKKUNAAN (ei kirjausriviin, joka on jo tiivis). Kertaluontoinen valinta per liike: [per käsi] [yhteensä] [kehon paino] → asettaa ex.weightMode. Ruututila EI ole ongelma (iPhone 17 Pro Max iso ruutu). Koodissa on jo valmis pohja (getWeightMode lukee ex.weightMode). Prioriteetti: matala.
+
+5. **Pikakysymykset päivitettävä uuteen tavoitteeseen** (Clauden bongaus, kosmeettinen). Valmentaja-välilehden pikakysymykset ovat yhä vanhoja ("Penkki ei nouse" jne.). Terveys on nyt ykköstavoite → esim. yksi kysymys "Selkä/olkapää-ystävällinen vaihtoehto liikkeelle X". Voi tehdä minkä tahansa version yhteydessä. Prioriteetti: matala.
+
+*(Iso, oma projektinsa — ei vielä v3.2:een):* Pitkän aikavälin muisti + periodisaatio = alla oleva kohta 1. Kytkeytyy kohtaan 3 (historia-seuranta).
+
+---
+
 
 **0. ~~TREENIOHJELMAN TARKISTUS~~ ✅ TEHTY v3.1:ssä — säilytetty tässä referenssiksi**
 
