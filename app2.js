@@ -8,7 +8,7 @@ const DEFAULT_PLAN = {
   A: {
     name: 'Treeni A — Yläkroppa (työntö) + Etujalat',
     exercises: [
-      { id: 'bench', name: 'Penkkipunnerrus', sets: 3, reps: '5–8', weight: 90, unit: 'kg', note: 'Pääliike voimalle' },
+      { id: 'bench', name: 'Penkkipunnerrus', sets: 3, reps: '5–8', weight: 90, unit: 'kg', note: 'Kyynärpäät ~45° kylkiin (ei 90°), lavat taakse+alas, vain kevyt selän notko' },
       { id: 'lat', name: 'Ylätalja / Leuanveto', sets: 3, reps: '8–10', weight: 70, unit: 'kg', note: 'Yläselkä vastapainoksi' },
       { id: 'bsq', name: 'Bulgarialainen split-kyykky', sets: 3, reps: '8–10/jalka', weight: 0, unit: 'kg', note: 'Etureidet & tasapaino — selkäystävällinen' },
       { id: 'tri', name: 'Ojentajapunnerrus taljassa', sets: 2, reps: '10–12', weight: 25, unit: 'kg', note: 'Penkin avuksi (dipin sijaan, säästää olkapäitä)' },
@@ -19,9 +19,9 @@ const DEFAULT_PLAN = {
     name: 'Treeni B — Yläkroppa (veto) + Takajalat',
     exercises: [
       { id: 'hip', name: 'Lantionnosto', sets: 3, reps: '10–12', weight: 40, unit: 'kg', note: 'Pakarat & takareidet — selkäystävällinen (selkä tuettuna)' },
-      { id: 'row', name: 'Kulmasoutu', sets: 3, reps: '8–10', weight: 70, unit: 'kg', note: 'Keskiselkä & penkin tukilihakset' },
-      { id: 'ohp', name: 'Hartiaprässi istuen (selkätuki)', sets: 2, reps: '10–12', weight: 40, unit: 'kg', note: 'Olkapäät — selkä tuettuna' },
-      { id: 'curl', name: 'Hauiskääntö', sets: 2, reps: '10–12', weight: 20, unit: 'kg', note: 'Käsivarren tasapaino' },
+      { id: 'row', name: 'Tuettu taljasoutu istuen', sets: 3, reps: '8–10', weight: 70, unit: 'kg', note: 'Keskiselkä — rinta tuettuna, selkäystävällinen (ei kulmasoutua)' },
+      { id: 'ohp', name: 'Arnold press istuen', sets: 2, reps: '10–12', weight: 20, unit: 'kg', note: 'Olkapäät — vapaa liikerata & säädettävä kulma (TOS-ystävällinen)' },
+      { id: 'curl', name: 'Vasarakääntö', sets: 2, reps: '10–12', weight: 14, unit: 'kg', note: 'Käsivarret — neutraali ranne (ei vaakakämmentä, nivelystävällinen)' },
       { id: 'splank', name: 'Sivulankku', sets: 2, reps: '20–30 s/puoli', weight: 0, unit: 'kg', note: 'Vinot vatsalihakset — tukee selkää sivusuunnassa' },
     ]
   }
@@ -38,11 +38,13 @@ const EXERCISE_LIBRARY = {
     { name: 'Punnerrus', note: 'Kehon paino' },
   ],
   'Selkä': [
-    { name: 'Ylätalja leveä ote', note: '' },
-    { name: 'Kulmasoutu', note: '' },
+    { name: 'Ylätalja leveä ote', note: 'Selkäystävällinen — edestä tuleva veto' },
+    { name: 'Tuettu taljasoutu istuen', note: 'Selkäystävällinen — rinta tuettuna' },
     { name: 'Taljasoutu istuen', note: 'Selkäystävällinen' },
     { name: 'Yhden käden käsipainosoutu', note: 'Selkäystävällinen' },
+    { name: 'Käsillä roikkuminen + polvennosto', note: 'Selkäystävällinen — ortopedin suosima' },
     { name: 'Leuanveto', note: 'Kehon paino' },
+    { name: 'Kulmasoutu', note: 'Varo selkää — ei tuettu' },
   ],
   'Jalat (selkäystävällinen)': [
     { name: 'Lantionnosto', note: 'Selkäystävällinen — pakarat & takareidet' },
@@ -51,23 +53,26 @@ const EXERCISE_LIBRARY = {
     { name: 'Jalkaprässi', note: 'Selkä tuettuna' },
     { name: 'Reiden ojennus (laite)', note: 'Polviystävällinen kevyellä' },
     { name: 'Reiden koukistus (laite)', note: 'Selkäystävällinen — takareidet' },
+    { name: 'Selän ojennus penkissä (hyperextension)', note: 'Selkäystävällinen — selän tukilihakset, ortopedin suosima' },
   ],
   'Jalat (varo selkää)': [
     { name: 'Kyykky', note: 'Varo selkää' },
     { name: 'Pohjenousu', note: '' },
   ],
   'Olkapäät': [
-    { name: 'Hartiaprässi istuen (selkätuki)', note: 'Selkäystävällinen' },
+    { name: 'Arnold press istuen', note: 'TOS-ystävällinen — vapaa liikerata & säädettävä kulma' },
     { name: 'Käsipainohartiaprässi istuen', note: 'Selkäystävällinen' },
     { name: 'Vipunosto sivulle', note: 'Kevyt olkakuorma' },
     { name: 'Vipunosto eteen', note: '' },
+    { name: 'Hartiaprässi istuen (selkätuki)', note: 'Selkätuki ok — varo kulmaa (TOS)' },
   ],
   'Kädet': [
-    { name: 'Dippi', note: 'Kehon paino' },
-    { name: 'Hauiskääntö', note: '' },
-    { name: 'Vasarakääntö', note: '' },
+    { name: 'Vasarakääntö', note: 'Nivelystävällinen — neutraali ranne' },
+    { name: 'Taljakääntö V-kahvalla', note: 'Nivelystävällinen — ei vaakakämmentä' },
+    { name: 'Hauiskääntö', note: 'Varo: kämmen ei täysin vaakaan' },
     { name: 'Ojentajapunnerrus taljassa', note: '' },
     { name: 'Ranskalainen punnerrus', note: '' },
+    { name: 'Dippi', note: 'Kehon paino' },
   ],
   'Vatsa/keskivartalo': [
     { name: 'Lankku', note: 'Selkäystävällinen' },
@@ -82,13 +87,47 @@ const EXERCISE_LIBRARY = {
 
 // Profiilin tiedot AI-valmentajalle
 const PROFILE = `
-Käyttäjä: JJ
-Tavoitteet: lihasmassan kasvu, voiman lisääminen, terveyden ylläpito
-Rajoitteet: selkävaurio JA olkapäät säästettävä. ÄLÄ suosittele tavallista maastavetoa, suorin jaloin maastavetoa (RDL) äläkä seisten tehtävää pystypunnerrusta. Turvalliset vaihtoehdot: lantionnosto (selkä tuettuna), Bulgarialainen split-kyykky, hartiaprässi istuen selkätuella.
-Treenifrekvenssi: 2 kertaa viikossa (realistinen tavoite)
-Treenijako: A (Yläkroppa työntö + Etujalat) ja B (Yläkroppa veto + Takajalat) vuorotellen. Molemmissa on keskivartaloliike (lankku/sivulankku) lopussa — tärkeä selän tuelle.
-Huom: lankut ja sivulankut mitataan sekunneissa, ei painossa. Näissä progressio tarkoittaa pidempää kestoaikaa, ei lisäpainoa.
-RPE: käyttäjä voi kirjata jokaiselle liikkeelle RPE-arvon (1–10, koettu kuormittavuus). Käytä sitä progression suunnitteluun kun se on annettu.
+Käyttäjä: JJ, keski-ikäinen mies. Haluaa pysyä vahvana, lihaksikkaana ja ryhdikkäänä.
+
+TAVOITTEET (tärkeysjärjestyksessä):
+1. ENSISIJAINEN: selän ja nivelten terveys ja kunnon ylläpito.
+2. SEKUNDAARINEN: pitää penkkipunnerrus samalla tasolla ja pysyä yläkropaltaan lihaksikkaana.
+(Huom: lihasmassan kasvu ei ole enää päätavoite — terveys menee sen edelle.)
+
+TERVEYSRAJOITTEET (kolme päällekkäistä vaivaa — kriittistä):
+A) Selkäranka: Lanneranka L4-5 (alkava välilevyongelma, madaltuneet välilevyt, spondyloosi) JA rintaranka T8-9/T10 (spondyloosinokat, aiheuttavat ylävatsan ja kyljen kipuoiretta). Ärsyyntyvät maastavedosta, kyykystä ja seisten tehtävästä pystypunnerruksesta.
+B) TOS (hartiapunos-oireyhtymä) + hermo-oireet: käsien puutumista kun kädet nostetaan yläasentoon. Kyynärpäissä hermon napsuva vaiva tietyissä liikkeissä. Overhead-liikkeet ovat toistaiseksi OK, MUTTA liikerata ja kulma ovat ratkaisevia — kiinteä hartiapunnerruslaite ja Smith tekevät kipeää olkavarsiin.
+C) Olkavarsi/kyynärpää: pystypunnerrus kiristää olkavarsia ulkopuolelta (ojentajien puoli).
+
+EHDOTTOMAT KIELLOT — ÄLÄ KOSKAAN suosittele näitä:
+- Tavallinen maastaveto, suorin jaloin maastaveto (RDL)
+- Takakyykky vapaalla tangolla / raskaat pystysuorat kompressiot selälle
+- Seisten tehtävä pystypunnerrus, raskaat pään yläpuoliset punnerrukset
+- Kiinteä hartiapunnerruslaite tai Smith-laitteella tehty pystypunnerrus
+- Epäkkäiden yläosan ylikuormitus
+
+TURVALLISET VAIHTOEHDOT (priorisoi näitä):
+- Selkä: tuettu taljasoutu istuen (rinta tuettuna), edestä tulevat taljaliikkeet, ylätalja, käsillä roikkuminen + polvien nosto
+- Olkapäät: Arnold press istuen (vapaa liikerata, säädettävä kulma — käyttäjän valitsema TOS-ystävällinen ratkaisu)
+- Kädet: vasarakääntö tai V-kahva-taljakääntö. Hauiskäännöissä ranne EI saa mennä täysin vaakaan (kämmenet suoraan kattoa kohti on epämukava) — pidä neutraali/vasara-asento.
+- Jalat: lantionnosto (selkä tuettuna), Bulgarialainen split-kyykky
+- Fokus yleisesti: lapaluun tuki (scapular stability), rintarangan liikkuvuus, tuetut selkäliikkeet.
+
+PENKKIPUNNERRUKSEN TURVATEKNIIKKA (tärkeä TOS:n ja selän takia — ohjeista aina näin):
+- Kyynärpäät noin 45° kulmassa kylkiin nähden — EI 90° flaretusta (suojaa hartiapunosta).
+- Lapaluut vedetään taakse ja alas ENNEN noston aloittamista (vankka alusta + tilaa rintakehän yläaukeamalle).
+- Selkä: vain kevyt luonnollinen notko — EI voimakasta voimanostokaarta. Lantio pysyy penkissä, jalat tukevasti maassa.
+
+PROGRESSIO: sovella hypertrofisen harjoittelun periaatteita — 2–3 treeniä/viikko, 8–12 toistoa, 2–3 sarjaa/liike. Terveys ja kivuttomuus menevät aina kuorman lisäyksen edelle.
+Treenifrekvenssi: 2 kertaa viikossa (realistinen tavoite).
+Treenijako: A (Yläkroppa työntö + Etujalat) ja B (Yläkroppa veto + Takajalat) vuorotellen. Molemmissa keskivartaloliike (lankku/sivulankku) lopussa — tärkeä selän tuelle.
+
+MERKINNÄT KIRJAUKSISSA:
+- Lankut ja sivulankut mitataan sekunneissa, ei painossa. Näissä progressio = pidempi kesto, ei lisäpaino.
+- Painon merkintätapa vaihtelee liikkeen mukaan: käsipainoliikkeissä paino on yleensä PER KÄSI, talja- ja tankoliikkeissä YHTEENSÄ, ja kehon paino -liikkeissä (punnerrus, leuanveto, dippi) "kehon paino" tai "kehon paino + lisäpaino". Huomioi tämä kun vertaat painoja liikkeiden välillä.
+- RPE (1–10, koettu kuormittavuus) voi olla kirjattuna per liike. Käytä sitä progression suunnitteluun kun se on annettu.
+
+TÄRKEÄ MUISTUTUS: Et ole lääkäri etkä fysioterapeutti. Käyttäjän lääkärien (ortopedi, käsikirurgi) ohjeet menevät aina neuvojesi edelle. Jos jokin on epäselvää tai ristiriitaista, sano se suoraan ja kehota kysymään ammattilaiselta.
 Kieli: suomi
 `;
 
@@ -225,7 +264,7 @@ function renderExerciseList(workoutKey, plan, sessions) {
     }
 
     if (lastMaxWeight && lastMaxWeight > 0) {
-      const suggestion = suggestNextWeight(ex.id, lastEx, lastMaxWeight);
+      const suggestion = suggestNextWeight(ex.id, lastEx, lastMaxWeight, ex.name);
       if (suggestion > lastMaxWeight) {
         detailText = ex.reps + ' @ ' + suggestion + ' kg';
         badgeHtml = '<span class="badge badge-up">+' + (suggestion - lastMaxWeight).toFixed(1) + ' kg</span>';
@@ -262,15 +301,70 @@ function renderExerciseList(workoutKey, plan, sessions) {
 
 // Aikaperustaiset liikkeet (mitataan sekunneissa, ei toistoina)
 const TIME_BASED_EXERCISES = ['plank', 'splank'];
-function isTimeBased(exerciseId) {
-  return TIME_BASED_EXERCISES.includes(exerciseId);
+
+// Nimet joista tunnistetaan aikaperustainen liike (kirjaston liikkeille joilla ei ole kiinteää id:tä)
+const TIME_BASED_KEYWORDS = ['lankku', 'lankutus', 'sivulankku', 'lintukoira', 'dead bug', 'hyönteinen', 'vuoristokiipeilijä'];
+
+function isTimeBased(exerciseId, exerciseName) {
+  if (TIME_BASED_EXERCISES.includes(exerciseId)) return true;
+  if (exerciseName) {
+    const n = exerciseName.toLowerCase();
+    return TIME_BASED_KEYWORDS.some(k => n.includes(k));
+  }
+  return false;
 }
 
-function suggestNextWeight(exerciseId, lastEx, baseWeight) {
+// ============================================================
+// PAINO-MERKINTÄ — automaattinen päättely liikkeen nimestä (turvaverkolla)
+// ============================================================
+// Palauttaa: 'per-kasi' | 'kehon-paino' | 'yhteensa'
+// Käyttäjä voi ylikirjoittaa tämän liikkeelle asettamalla ex.weightMode.
+function getWeightMode(ex) {
+  // Turvaverkko: käyttäjän oma valinta menee automatiikan edelle
+  if (ex && ex.weightMode) return ex.weightMode;
+
+  const name = ((ex && ex.name) || '').toLowerCase();
+
+  // Kehon paino -liikkeet (paino = valinnainen lisäpaino).
+  // HUOM: "punnerrus" on tarkoituksella POIS listalta, koska penkkipunnerrus,
+  // pystypunnerrus ym. eivät ole kehon paino -liikkeitä. Push-up on suomeksi
+  // yleensä "punnerrus" yksinään — käsitellään erillisellä tarkalla säännöllä.
+  const bodyweightKeywords = ['leuanveto', 'dippi', 'dippaus', 'roikku', 'polvennosto', 'polvien nosto', 'lankku', 'lankutus', 'lintukoira', 'hyönteinen', 'vuoristokiipeilijä', 'vatsarutistus'];
+  if (bodyweightKeywords.some(k => name.includes(k))) {
+    return 'kehon-paino';
+  }
+  // Push-up: nimi on tasan "punnerrus" (ei penkki-/pysty-/ojentaja-/ranskalainen-etuliitettä)
+  if (name.trim() === 'punnerrus') {
+    return 'kehon-paino';
+  }
+
+  // Käsipainoliikkeet → per käsi
+  const perHandKeywords = ['käsipaino', 'vasarakääntö', 'arnold', 'vipunosto', 'yhden käden'];
+  if (perHandKeywords.some(k => name.includes(k))) {
+    return 'per-kasi';
+  }
+  // Hauiskääntö ilman "talja"-sanaa oletetaan käsipainoilla tehtäväksi
+  if (name.includes('hauiskääntö') && !name.includes('talja')) {
+    return 'per-kasi';
+  }
+
+  // Oletus: talja- ja tankoliikkeet → yhteispaino
+  return 'yhteensa';
+}
+
+// Lyhyt vihjeteksti paino-otsikon alle kirjauksessa
+function getWeightModeHint(ex) {
+  const mode = getWeightMode(ex);
+  if (mode === 'per-kasi') return 'per käsi';
+  if (mode === 'kehon-paino') return 'lisäpaino, tyhjä = kehon paino';
+  return 'yhteensä';
+}
+
+function suggestNextWeight(exerciseId, lastEx, baseWeight, exerciseName) {
   const w = parseFloat(baseWeight) || 0;
   if (w === 0) return 0;
   // Aikaperustaiset core-liikkeet (lankku ym.): ei automaattista painonlisäystä
-  if (isTimeBased(exerciseId)) return w;
+  if (isTimeBased(exerciseId, exerciseName)) return w;
   if (exerciseId === 'bench') return w + 2.5;
   return w + 2.5;
 }
@@ -290,18 +384,34 @@ function analyzeSetDirection(sets) {
   return 'vaihteleva';
 }
 
-// Muotoile sarjat luettavaan muotoon (esim. "80×5, 90×5" tai lankulle "30s, 30s")
-function formatSets(sets, exerciseId) {
+// Muotoile sarjat luettavaan muotoon (esim. "80×5, 90×5" tai lankulle "30s, 30s").
+// exOrId voi olla joko liike-objekti {id, name, weightMode} tai pelkkä id-merkkijono (vanha kutsutapa).
+function formatSets(sets, exOrId) {
   if (!sets || sets.length === 0) return '—';
-  const timeBased = exerciseId && isTimeBased(exerciseId);
+
+  // Tue sekä uutta (objekti) että vanhaa (pelkkä id) kutsutapaa
+  const ex = (typeof exOrId === 'object' && exOrId !== null) ? exOrId : { id: exOrId, name: '' };
+  const timeBased = isTimeBased(ex.id, ex.name);
+  const mode = getWeightMode(ex);
+
   return sets.map(s => {
     let str;
+    const w = s.weight || 0;
     if (timeBased) {
       // Aikaperustainen: näytä sekunnit (reps-kenttä sisältää sekunnit)
       str = (s.reps || 0) + 's';
-      if (s.weight > 0) str += ' +' + s.weight + 'kg'; // painotettu lankku
+      if (w > 0) str += ' +' + w + 'kg'; // painotettu lankku
+    } else if (mode === 'kehon-paino') {
+      // Kehon paino: tyhjä/0 = "kehon paino", muuten "kehon paino +Xkg"
+      if (w > 0) {
+        str = 'kehon paino +' + w + 'kg × ' + (s.reps || 0);
+      } else {
+        str = 'kehon paino × ' + (s.reps || 0);
+      }
     } else {
-      str = (s.weight || 0) + '×' + (s.reps || 0);
+      // Normaali paino×toistot
+      str = w + '×' + (s.reps || 0);
+      if (mode === 'per-kasi') str += ' (/käsi)';
     }
     if (s.rpe) str += ' (RPE' + s.rpe + ')';
     return str;
@@ -513,9 +623,9 @@ function openLogModalWithData(draftData) {
     let suggestedWeight = ex.weight;
     if (lastEx && lastEx.sets && lastEx.sets.length > 0) {
       const weights = lastEx.sets.map(s => s.weight || 0);
-      suggestedWeight = suggestNextWeight(ex.id, lastEx, Math.max(...weights));
+      suggestedWeight = suggestNextWeight(ex.id, lastEx, Math.max(...weights), ex.name);
     } else if (lastEx && lastEx.actualWeight) {
-      suggestedWeight = suggestNextWeight(ex.id, lastEx, lastEx.actualWeight);
+      suggestedWeight = suggestNextWeight(ex.id, lastEx, lastEx.actualWeight, ex.name);
     }
 
     // Sarjojen määrä: draftista jos jatketaan, muuten viime kerta tai ohjelma
@@ -539,7 +649,7 @@ function openLogModalWithData(draftData) {
     // Edellisen kerran suoritus muistin tueksi
     let lastTimeHtml = '';
     if (lastEx && lastEx.sets && lastEx.sets.length > 0) {
-      lastTimeHtml = `<div class="log-last-time">Viime kerralla: ${formatSets(lastEx.sets, ex.id)}</div>`;
+      lastTimeHtml = `<div class="log-last-time">Viime kerralla: ${formatSets(lastEx.sets, ex)}</div>`;
     } else if (lastEx && lastEx.actualWeight) {
       lastTimeHtml = `<div class="log-last-time">Viime kerralla: ${lastEx.actualWeight} kg</div>`;
     }
@@ -549,13 +659,13 @@ function openLogModalWithData(draftData) {
         <span class="log-step-counter">Liike ${exIndex + 1}/${totalLogSteps}</span>
       </div>
       <div class="log-ex-name">${ex.name}</div>
-      <div class="log-ex-target">Tavoite: ${ex.reps}${(ex.weight > 0 && !isTimeBased(ex.id)) ? ' @ ' + suggestedWeight + ' kg (raskain sarja)' : ''}</div>
+      <div class="log-ex-target">Tavoite: ${ex.reps}${(ex.weight > 0 && !isTimeBased(ex.id, ex.name)) ? ' @ ' + suggestedWeight + ' kg (raskain sarja)' : ''}</div>
       ${lastTimeHtml}
       ${exIndex === 0 ? '<div class="rpe-hint">RPE = kuinka raskas sarja oli (1–10). 10 = maksimi, 8 = 2 toistoa jäi varaan. Vapaaehtoinen.</div>' : ''}
       <div class="sets-header">
         <span class="sets-col-label">Sarja</span>
-        <span class="sets-col-label">${isTimeBased(ex.id) ? 'Sekunnit' : 'Toistot'}</span>
-        <span class="sets-col-label">Paino (kg)</span>
+        <span class="sets-col-label">${isTimeBased(ex.id, ex.name) ? 'Sekunnit' : 'Toistot'}</span>
+        <span class="sets-col-label">Paino (kg)<span class="col-hint">${isTimeBased(ex.id, ex.name) ? 'tyhjä = ei lisäpainoa' : getWeightModeHint(ex)}</span></span>
         <span class="sets-col-label">RPE</span>
       </div>
       <div class="sets-container" id="sets-${ex.id}"></div>
@@ -857,6 +967,7 @@ function collectLogData() {
       id: exId,
       name: exName,
       sets: sets,
+      weightMode: getWeightMode({ id: exId, name: exName }),
       note: document.getElementById('note-' + exId)?.value || '',
     });
   });
@@ -930,7 +1041,7 @@ async function analyzeSession(session, allSessions) {
     const exText = s.exercises.map(e => {
       // Uusi sarjaformaatti tai vanha
       if (e.sets && e.sets.length > 0) {
-        return `${e.name}: ${formatSets(e.sets, e.id)} [${analyzeSetDirection(e.sets)}]${e.note ? ' (' + e.note + ')' : ''}`;
+        return `${e.name}: ${formatSets(e.sets, e)} [${analyzeSetDirection(e.sets)}]${e.note ? ' (' + e.note + ')' : ''}`;
       }
       return `${e.name}: ${e.actualWeight || 0}kg${e.rpe ? ' RPE' + e.rpe : ''}${e.note ? ' (' + e.note + ')' : ''}`;
     }).join('; ');
@@ -939,7 +1050,7 @@ async function analyzeSession(session, allSessions) {
 
   const todayText = session.exercises.map(e => {
     if (e.sets && e.sets.length > 0) {
-      return `- ${e.name}: ${formatSets(e.sets, e.id)} · sarjojen suunta: ${analyzeSetDirection(e.sets)}${e.note ? ' · huomio: ' + e.note : ''}`;
+      return `- ${e.name}: ${formatSets(e.sets, e)} · sarjojen suunta: ${analyzeSetDirection(e.sets)}${e.note ? ' · huomio: ' + e.note : ''}`;
     }
     return `- ${e.name}: ${e.actualWeight || 0}kg${e.note ? ' · huomio: ' + e.note : ''}`;
   }).join('\n');
@@ -1037,7 +1148,7 @@ ${plan[nextWorkout].exercises.map((e, i) => `${i + 1}. ${e.name} (${e.sets}×${e
   const historyText = sessions.slice(-5).map(s =>
     `${s.date}: ${s.exercises.map(e => {
       if (e.sets && e.sets.length > 0) {
-        return `${e.name} ${formatSets(e.sets, e.id)}`;
+        return `${e.name} ${formatSets(e.sets, e)}`;
       }
       return `${e.name} ${e.actualWeight || 0}kg`;
     }).join('; ')}`
@@ -1253,7 +1364,7 @@ function renderHistory() {
       // Uusi sarjaformaatti tai vanha
       let detailStr, badgeStr;
       if (ex.sets && ex.sets.length > 0) {
-        detailStr = formatSets(ex.sets, ex.id);
+        detailStr = formatSets(ex.sets, ex);
         const maxW = Math.max(...ex.sets.map(x => x.weight || 0));
         badgeStr = maxW + ' kg';
       } else {
