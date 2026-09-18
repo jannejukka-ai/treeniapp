@@ -5,6 +5,45 @@ Uusin versio on aina ylimpänä.
 
 ---
 
+## v3.1 — 18.9.2026
+
+**Iso päivitys: terveysmuutokset + kirjausmerkintöjen selkeytys.** Yhdistetty kaksi kokonaisuutta (TODO-kohdat 0, 0.4, 0.5c), koska molemmat koskevat liikkeitä ja kirjaamista.
+
+**Terveysmuutokset (lääkärien löydösten pohjalta):**
+- Kolme liikevaihtoa oletusohjelmaan (Treeni B), TOS- ja selkäystävällisemmiksi:
+  - Kulmasoutu → Tuettu taljasoutu istuen (rinta tuettuna, selkäystävällinen)
+  - Hartiaprässi istuen → Arnold press istuen (vapaa liikerata & säädettävä kulma, TOS-ystävällinen)
+  - Hauiskääntö → Vasarakääntö (neutraali ranne, ei vaakakämmentä, nivelystävällinen)
+- Arnold pressin ja vasarakäännön oletuspainot laskettu käsipainoliikkeille sopiviksi (per käsi)
+- Penkkipunnerruksen turvatekniikka lisätty sekä liikkeen ohjetekstiin ETTÄ valmentajan profiiliin: kyynärpäät noin 45° kylkiin (ei 90°), lapaluut taakse ja alas ennen nostoa, vain kevyt luonnollinen selän notko (ei voimanostokaarta)
+
+**Valmentajan profiili (AI) päivitetty kokonaan:**
+- Kaikki kolme päällekkäistä vaivaa: L4-5 + T8-9/T10 (selkäranka), TOS + hermo-oireet, olkavarsi/kyynärpää
+- Uudet tavoitteet: selän ja nivelten terveys ensisijaiseksi, penkki samalla tasolla + lihaksikkuus toissijaisiksi (lihasmassan kasvu ei enää päätavoite)
+- Ehdottomat kiellot (maastaveto, kyykky, seisten pystypunnerrus, kiinteä hartialaite/Smith) ja turvalliset vaihtoehdot listattu selkeästi
+- Lisätty muistutus: lääkärien ohjeet menevät aina AI:n neuvojen edelle
+
+**Liikekirjasto laajennettu turvallisilla vaihtoehdoilla:**
+- Uudet: Tuettu taljasoutu istuen, Käsillä roikkuminen + polvennosto, Selän ojennus penkissä (hyperextension), Arnold press istuen, Taljakääntö V-kahvalla
+- Kulmasoutu ja tavallinen hauiskääntö merkitty varoituksin
+- Tavoitteet-kortti Valmentaja-välilehdellä päivitetty uuteen tärkeysjärjestykseen
+
+**Kirjausmerkintöjen selkeytys:**
+- Paino-merkintä automaattisesti liikkeen mukaan: kirjauksessa paino-otsikon alla pieni harmaa vihje siitä mitä paino tarkoittaa — "per käsi" (käsipainot), "yhteensä" (talja/tanko) tai "lisäpaino, tyhjä = kehon paino"
+- Merkintä päätellään liikkeen nimestä; käyttäjä voi tarvittaessa ylikirjoittaa sen liikekohtaisesti (turvaverkko)
+- Kehon paino -bugi korjattu: kehon paino -liikkeissä (punnerrus, leuanveto, dippi, roikkuminen) tyhjä painokenttä ei enää näytä harhaanjohtavaa "0×10". Nyt näkyy "kehon paino × 10" tai lisäpainolla "kehon paino +10kg × 8" — sekä historiassa että valmentajan analyysissä
+- Per käsi -merkintä näkyy historiassa käsipainoliikkeille (esim. "14×10 (/käsi)")
+- Aikaperustaiset liikkeet tunnistetaan nyt myös nimestä (lankku, sivulankku, lintukoira, kuollut hyönteinen, vuoristokiipeilijä), ei vain kiinteästä id:stä
+
+**Tekniset muutokset:**
+- Uudet apufunktiot: getWeightMode, getWeightModeHint, laajennettu isTimeBased
+- formatSets hyväksyy nyt joko liike-objektin tai vanhan pelkän id:n (vanha data ei rikkoudu)
+- Kirjattuun treeniin tallennetaan weightMode tulevaisuuden varmuudeksi
+- 24 automaattista yksikkötestiä ajettu läpi (paino-merkinnän päättely + formatSets)
+- Muokattu: app2.js, index.html (treenijako, tavoitteet, footer v3.1), style.css (paino-vihjeen tyyli)
+
+---
+
 ## v3.0.1 — 2.9.2026
 
 **Keskustelun työnkulku korjattu (käytettävyyskorjaus):**
