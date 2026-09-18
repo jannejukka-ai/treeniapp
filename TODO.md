@@ -73,6 +73,12 @@ HUOM: Claude ei ole lääkäri/fysioterapeutti — lääkärien ohjeet menevät 
 **0.4. KIRJAUKSEN MERKINTÖJEN SELKEYTYS — paino & yksiköt (OSITTAIN TEHTY v3.1)**
 
 ✅ TEHTY v3.1:ssä: paino-merkintä automaattisesti (per käsi/yhteensä/kehon paino) vihjetekstinä otsikon alla; kehon paino -bugi (0×10) korjattu; aikaperustaiset liikkeet tunnistetaan nimestä.
+
+📌 HUOM automatiikan korjaamisesta (JJ:n valinta v3.1:ssä): käsivalintaa merkinnälle EI rakennettu käyttöliittymään — automatiikka riittää. Jos jokin liike arpoo väärin, korjaus tehdään manuaalisesti koodiin:
+   - Automatiikan logiikka on funktiossa `getWeightMode` (app2.js). Sinne lisätään liikkeen nimi oikeaan avainsanalistaan (bodyweightKeywords / perHandKeywords) → korjaantuu heti kaikille.
+   - Koodissa on jo valmis pohja liikekohtaiselle ylikirjoitukselle: jos liike-objektille asettaa kentän `weightMode` ('per-kasi' | 'kehon-paino' | 'yhteensa'), se voittaa automatiikan. Tätä varten EI ole vielä UI:ta — se olisi pieni lisätyö jos joskus tarve (nappi/valikko liikkeenvaihto-ikkunaan).
+   - Konkreettinen esimerkki korjauksesta: jos "Uusi kummallinen liike X" pitäisi olla per käsi mutta näkyy "yhteensä", lisää sen nimen tunnistava sana perHandKeywords-listaan getWeightMode-funktiossa.
+
 ⬜ JÄI TEKEMÄTTÄ: toistojen per-puoli-erittely erikseen (esim. sivulankku/lintukoira "toistot per puoli"). Paino-puoli on hoidettu, mutta toistojen repMode ('per puoli') olisi vielä oma lisänsä jos halutaan täsmällisyyttä.
 
 
