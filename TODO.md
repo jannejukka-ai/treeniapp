@@ -13,9 +13,24 @@ Valmentaja muistaa nyt käynnissä olevan keskustelun ja osaa vastata jatkokysym
 
 ---
 
+## VALMIS ✅ — v3.1: Terveysmuutokset + kirjausmerkinnät (toteutettu 18.9.2026)
+
+Toteutettu TODO:n kohdat **0, 0.4 ja 0.5c** yhtenä versiona. Tiivistetysti:
+- 3 liikevaihtoa oletukseen: Kulmasoutu→Tuettu taljasoutu istuen, Hartiaprässi→Arnold press istuen, Hauiskääntö→Vasarakääntö
+- Penkin turvatekniikka (45° kyynärpäät, lapatuki, kevyt notko) liikkeen ohjetekstiin JA valmentajan profiiliin
+- Valmentajan profiili päivitetty: 3 vaivaa + uudet tavoitteet (terveys ensisijaiseksi) + kiellot/vaihtoehdot
+- Liikekirjasto laajennettu: tuettu taljasoutu, roikkuminen+polvennosto, selän ojennus penkissä, Arnold press, V-kahva-taljakääntö
+- Paino-merkintä automaattisesti (per käsi / yhteensä / kehon paino) + kehon paino -bugi (0×10) korjattu
+- Aikaperustaiset liikkeet tunnistetaan nyt myös nimestä
+Katso tarkemmat tiedot CHANGELOG:sta v3.1.
+
+**Jäi tähän versioon TEKEMÄTTÄ (siirretty pipelineen alle):** kohdat 0.4:n täysi per-puoli-toistojen erittely (esim. "10/puoli" erikseen toistoille), 0.5a (kirjauksen korjaus jälkikäteen), 0.5b (joustava liikejärjestys). Kohta 7 (varmista ortopedilta raskas penkki + lantion notko) on käyttäjän itsensä hoidettava, ei koodimuutos.
+
+---
+
 ## PIPELINE — seuraavat kehityskohteet (käyttäjän priorisoima järjestys)
 
-**0. TREENIOHJELMAN TARKISTUS lääkärien löydösten pohjalta (TERVEYSPRIORITEETTI — käsitellään ennen muita)**
+**0. ~~TREENIOHJELMAN TARKISTUS~~ ✅ TEHTY v3.1:ssä — säilytetty tässä referenssiksi**
 
 Käyttäjällä on KOLME päällekkäistä vaivaa jotka vaikuttavat ohjelmaan:
 
@@ -55,7 +70,11 @@ HUOM: Claude ei ole lääkäri/fysioterapeutti — lääkärien ohjeet menevät 
 
 ---
 
-**0.4. KIRJAUKSEN MERKINTÖJEN SELKEYTYS — paino & yksiköt (KÄYTETTÄVYYS + DATAN LUOTETTAVUUS)**
+**0.4. KIRJAUKSEN MERKINTÖJEN SELKEYTYS — paino & yksiköt (OSITTAIN TEHTY v3.1)**
+
+✅ TEHTY v3.1:ssä: paino-merkintä automaattisesti (per käsi/yhteensä/kehon paino) vihjetekstinä otsikon alla; kehon paino -bugi (0×10) korjattu; aikaperustaiset liikkeet tunnistetaan nimestä.
+⬜ JÄI TEKEMÄTTÄ: toistojen per-puoli-erittely erikseen (esim. sivulankku/lintukoira "toistot per puoli"). Paino-puoli on hoidettu, mutta toistojen repMode ('per puoli') olisi vielä oma lisänsä jos halutaan täsmällisyyttä.
+
 
 Käyttäjä nosti esiin tärkeän epäselvyyden: kun kirjaa esim. hauiskäännön alataljalla, tarkoittaako "Paino (kg)" koko painoa vai per puoli? Nykyään sovellus EI määrittele tätä lainkaan — jätetty käyttäjän tulkinnan varaan. Tämä haittaa tulosten vertailua kerrasta toiseen.
 
