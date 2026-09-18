@@ -15,30 +15,101 @@ Valmentaja muistaa nyt käynnissä olevan keskustelun ja osaa vastata jatkokysym
 
 ## PIPELINE — seuraavat kehityskohteet (käyttäjän priorisoima järjestys)
 
-**0. TREENIOHJELMAN TARKISTUS ortopedin löydösten pohjalta (TERVEYSPRIORITEETTI — käsitellään ennen muita)**
+**0. TREENIOHJELMAN TARKISTUS lääkärien löydösten pohjalta (TERVEYSPRIORITEETTI — käsitellään ennen muita)**
 
-Käyttäjä kävi ortopedilla. Uudet löydökset:
+Käyttäjällä on KOLME päällekkäistä vaivaa jotka vaikuttavat ohjelmaan:
+
+*A) Selkäranka (ortopedi):*
 - Lanneranka L4-5: alkava välilevyongelma, madaltuneet välilevyt, spondyloosi
-- Rintaranka T8-9 (ja mahdollisesti T10): UUSI löydös — spondyloosinokat, jotka aiheuttavat ylävatsan ja kyljen kipuoiretta. Ärsyyntyvät maastavedosta ja pystypunnerruksesta/kyykystä.
+- Rintaranka T8-9 (ja mahdollisesti T10): spondyloosinokat, aiheuttavat ylävatsan ja kyljen kipuoiretta. Ärsyyntyvät maastavedosta ja pystypunnerruksesta/kyykystä.
+- Ortopedin ohjeet: POIS maastaveto JA kyykky (jo poissa — kunnossa). HYVÄKSI: soutuliike (tarkista kulmasoutu → tuettu soutu), edestä tulevat taljaliikkeet (ylätalja jo mukana), käsillä roikkuminen + polvien nosto rinnalle (lisää), selkäpunnerruspenkki (lisää).
 
-Ortopedin ohjeet:
-- POIS kokonaan: maastaveto JA kyykky (perusliikkeistä kaksi). [Nämä eivät jo ole ohjelmassa — kunnossa.]
-- HYVÄKSI todetut, rintarankaa avaavat / nikamien takaa keventävät liikkeet:
-  - Soutuliike (mutta huom: tarkista onko nykyinen KULMASOUTU liian alaselkää kuormittava etukumarassa — harkitse vaihtoa TUETTUUN soutuun, esim. taljasoutu istuen tai tuettu käsipainosoutu)
-  - Edestä tulevat taljaliikkeet (ylätalja on jo ohjelmassa — hyvä)
-  - Käsillä roikkuminen + polvien/jalkojen nosto rinnalle (EI vielä ohjelmassa — harkitse lisäystä; dekompressoi rankaa + core)
-  - Selkäpunnerruspenkin käyttö (EI vielä ohjelmassa — harkitse lisäystä)
+*B) TOS + hermo-oireet (käsikirurgi, viime kesä):*
+- Hartiapunos-oireyhtymä (TOS): käsien puutumista kun kädet nostaa yläasentoon
+- Kyynärpäissä hermon "saltans"-vaiva: hermo napsuu luun yli, epämukava tunne tietyissä liikkeissä
+- KÄYTÄNNÖN HAVAINTO salilla: pystypunnerrus ei ole miellyttävä — kiristää olkavarsia ulkopuolelta (ojentajien puoli). Smith ja kiinteä hartiapunnerruslaite tekevät kipeää olkavarsiin.
+- KÄYTTÄJÄN TARKENNUS: overhead itsessään on toistaiseksi OK — ongelma on LIIKERATA/KULMA, ei yläasento sinänsä. Ratkaisu tälle:
+  - Hartiaprässi/pystypunnerrus → ARNOLD PRESS (käyttäjällä ollut sopiva; vapaa liikerata + säädettävä kulma ja käden asento). Tämä on valittu ratkaisu.
+- SAMA KULMA-ONGELMA HAUISKÄÄNNÖISSÄ: vaikea löytää sopiva tapa. Kämmenet eivät saa joutua täysin vaakasuoraan (kämmenet suoraan kattoa kohti) — se on epämukava. Toimivat vaihtoehdot käyttäjälle:
+  - Käsipaino- / hammer- (vasara)kääntö
+  - Alataljassa V-muotoinen kahva jossa n. 45° V-kulma sisään/keskelle päin (kämmenet eivät käänny epäluonnollisen vaakasuoriksi)
+  - → Harkitse oletusohjelman hauiskäännön vaihtoa vasarakääntöön TAI taljakääntö V-kahvalla, ja merkitse kirjastoon nämä nivelystävällisinä
 
-Tarkistuksen johtopäätös (Claude): ohjelma on jo suurelta osin linjassa, EI vaadi isoa remonttia. Kohdennetut hienosäädöt:
-1. Kulmasoutu → tuettu soutu (1 liikkeen vaihto, vähentää etukumaraa alaselkäkuormaa)
-2. Harkitse 1-2 ortopedin suosittelemaa liikettä lisää (roikkuminen + polvennosto; selkäpunnerruspenkki)
-3. PÄIVITÄ PROFILE-teksti app2.js:ssä uusilla löydöksillä (T8-9/T10 rintaranka, L4-5 lanneranka, kiellot: maastaveto/kyykky/pystypunnerrus, suositukset: rintarankaa avaavat liikkeet). Ilman tätä valmentaja ei tiedä uusista rajoitteista.
-4. Varmista ortopedilta erikseen: onko raskas PENKKIPUNNERRUS ok (lantion notko voi kuormittaa)? Ei todennäköinen ongelma, mutta hyvä tarkistaa.
+*C) Päivitetyt tavoitteet (käyttäjä):*
+- ENSISIJAINEN tavoite nyt: selän ja nivelten terveys ja kunnon ylläpito
+- SEKUNDAARINEN: pitää penkkipunnerrus samalla tasolla, pysyä yläkropaltaan lihaksikkaana
+- (Muutos aiempaan: terveys nousi ykköseksi, lihasmassan kasvu ei enää päätavoite)
 
-Tavoitteet pysyvät samoina kuin projektissa aiemmin (lihasmassa, voima, terveys, 2×/vko).
-HUOM: Claude ei ole lääkäri/fysioterapeutti — ortopedin ohjeet menevät aina edelle. Epäselvissä kohdissa kysy ortopedilta/fysioterapeutilta.
+*Tarvittavat toimet kun rakennetaan:*
+1. Kulmasoutu → tuettu soutu (taljasoutu istuen tai tuettu käsipainosoutu)
+2. Hartiaprässi → ARNOLD PRESS (käyttäjän valinta; kulma/liikerata-ystävällinen)
+3. Hauiskääntö → vasarakääntö tai taljakääntö V-kahvalla (nivelystävällinen kulma)
+4. Harkitse lisättäviä: roikkuminen + polvennosto, selkäpunnerruspenkki
+5. PÄIVITÄ PROFILE-teksti app2.js:ssä: kaikki kolme vaivaryhmää (selkä T8-9/T10 + L4-5, TOS + hermo-oireet, olkavarsi/kyynärpää-oireet) JA uudet tavoitteet (terveys ensisijaiseksi). Mainitse myös kulma-ongelma (overhead ok, mutta liikerata tärkeä; hauiskäännöissä ei vaakakämmentä).
+6. Liikekirjaston päivitys: lisää turvalliset vaihtoehdot (tuettu soutu, Arnold press, vasarakääntö/V-kahva-taljakääntö, roikkuminen+polvennosto, selkäpunnerruspenkki)
+7. Varmista ortopedilta: raskas PENKKIPUNNERRUS ok (lantion notko)?
 
-- Työmääräarvio: pieni–keskitaso (muutama liikevaihto + profiilin päivitys)
+HUOM: Claude ei ole lääkäri/fysioterapeutti — lääkärien ohjeet menevät aina edelle. Kolme päällekkäistä vaivaa tekee tästä monimutkaisen; fysioterapeutin kokonaisarvio olisi arvokas.
+
+- Työmääräarvio: keskitaso (useita liikevaihtoja + profiilin ja kirjaston päivitys + tavoitteiden muutos)
+
+---
+
+**0.4. KIRJAUKSEN MERKINTÖJEN SELKEYTYS — paino & yksiköt (KÄYTETTÄVYYS + DATAN LUOTETTAVUUS)**
+
+Käyttäjä nosti esiin tärkeän epäselvyyden: kun kirjaa esim. hauiskäännön alataljalla, tarkoittaako "Paino (kg)" koko painoa vai per puoli? Nykyään sovellus EI määrittele tätä lainkaan — jätetty käyttäjän tulkinnan varaan. Tämä haittaa tulosten vertailua kerrasta toiseen.
+
+Tarvitaan: liikekohtainen merkintä siitä, mitä paino ja toistot tarkoittavat. Toteutustapa mietittävä (esim. liikkeelle metatieto: weightMode = 'yhteensä' | 'per puoli' | 'kehon paino', repMode = 'toistot' | 'sekunnit' | 'per puoli'). Kentän otsikko mukautuu liikkeen mukaan.
+
+Kirjaston läpikäynti (34 liikettä) — nämä tarvitsevat tarkennuksen:
+
+*Aikaperustaiset (Toistot → Sekunnit) — EI vielä merkitty aikaperustaisiksi kirjastossa:*
+- Lankku, Sivulankku (kirjastoversiot — vain oletustreenien lankut on nyt merkitty koodissa id:llä plank/splank)
+- Lintukoira, Kuollut hyönteinen (dead bug) — usein pidoilla, joskus toistoina; päätä kumpi
+- Vuoristokiipeilijä — yleensä aikaperustainen
+
+*Per puoli / yksipuoliset (selvennä paino per käsi/jalka JA/TAI toistot per puoli):*
+- Yhden käden käsipainosoutu (per käsi)
+- Bulgarialainen split-kyykky (per jalka — toistot jo "/jalka" oletuksessa, ei kirjastossa)
+- Askelkyykky (per jalka)
+- Sivulankku, Lintukoira, Kuollut hyönteinen (per puoli)
+
+*Kehon paino (paino-kenttä turha tai valinnainen lisäpaino):*
+- Punnerrus, Leuanveto, Dippi (merkitty "Kehon paino", mutta paino-kenttä silti aktiivinen)
+- KONKREETTINEN HAVAINTO (koodi rivi ~851): tyhjä painokenttä tallentuu nyt arvona 0, eikä sitä tulkita "kehon painoksi". Historiassa näkyy "0×10" mikä on harhaanjohtava.
+- RATKAISU: kehon paino -liikkeissä tyhjä/0 näytettäköön "kehon paino", ja lisäpainolla "kehon paino +10 kg". Näin sekä käyttäjä että valmentaja näkevät eron. (Sama logiikka kuin lankun painotettu versio "30s +10kg" jo tekee.)
+- HUOM: painokenttä säilytetään KAIKISSA näissä (myös lankku) — painotettu versio on yleinen ja haluttu (esim. levypaino selän päällä lankussa, painoliivi, käsipainot split-kyykyssä).
+
+*Yleishuomio painosta:*
+- Talja- ja tankoliikkeet: yleensä kokonaispaino (näkyy suoraan)
+- Käsipainot: yleensä per käsi
+- → Merkintä pitää tehdä selväksi kummassakin tapauksessa
+
+- Työmääräarvio: keskitaso (metatietojärjestelmä liikkeille + kaikkien liikkeiden läpikäynti + kirjaus-UI:n mukautus). HUOM: liittyy läheisesti kohtaan 0.5c (lankun yksikkö) — kannattaa tehdä samalla.
+
+---
+
+**0.5. TOIMINNALLISUUSPARANNUKSET (käyttäjän keräämä lista — käytettävyys)**
+
+*a) Kirjatun painon/sarjan korjaus jälkikäteen:*
+- Ongelma: kun on jo siirtynyt eteenpäin treenissä (yhden liikkeen näkymä), aiemman liikkeen virheellistä kirjausta ei pääse korjaamaan.
+- Mahdollinen ratkaisu: "Edellinen"-napilla palaaminen (osin jo mahdollista?), TAI yhteenvetonäkymä ennen tallennusta jossa voi korjata mitä tahansa liikettä/sarjaa.
+- Arvio: keskitaso
+
+*b) Joustava liikejärjestys (laite varattu -tilanne):*
+- Ongelma: jos salilla ei voi tehdä liikkeitä ohjelman järjestyksessä (esim. laite varattu, haluaa tehdä toisen liikkeen odotellessa), sovellus ei jousta.
+- Mahdollinen ratkaisu: mahdollisuus hypätä liikkeisiin vapaassa järjestyksessä, tai merkitä liike "teen myöhemmin".
+- Arvio: keskitaso
+
+*c) Lankun yksikkö näyttää yhä väärin (sekunnit):*
+- HUOM: korjaus ON jo koodissa (v2.9, rivi ~557: "Sekunnit"-otsikko aikaperustaisille). Jos yhä näkyy väärin → todennäköisesti v2.9-deploy ei mennyt kokonaan läpi (käyttäjällä oli token-ongelmia siihen aikaan).
+- Toimi: tarkista näkyykö nykyisessä livessä (footer v3.0.1) lankku oikein "Sekunnit"-otsikolla. Jos ei, tutki miksi korjaus ei ole voimassa vaikka koodissa on.
+- Arvio: pieni (todennäköisesti deploy-asia, ei koodivirhe)
+
+*d) Treenitavoitteet uusiksi + liikekirjaston laajennus:*
+- Kytkeytyy suoraan kohtaan 0 (tavoitteet C-kohdassa, kirjasto kohdassa 5). Käsitellään yhdessä.
+
+- Kokonaisarvio 0.5: keskitaso
 
 ---
 
