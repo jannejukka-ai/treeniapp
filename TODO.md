@@ -5,6 +5,8 @@ Kun jokin kohta rakennetaan, se siirretään CHANGELOG-tiedostoon valmiina versi
 
 **MUISTA jokaisessa versiopäivityksessä:** päivitä versionumero myös index.html:n footeriin (teksti "Treeniapp v3.1"). Se ei päivity automaattisesti.
 
+**⚠️ PYSYVÄ SÄÄNTÖ — AI-VALMENTAJAN SYNKRONOINTI:** Aina kun muutetaan liikkeitä, treenijakoa, tavoitteita, rajoitteita tai kirjauslogiikkaa, TARKISTA JA PÄIVITÄ SAMASSA YHTEYDESSÄ myös AI-valmentajan tiedot (PROFILE-teksti app2.js:ssä, ja tarvittaessa buildCoachContext / analyzeSession-promptit). Syy: jos valmentajan tiedot jäävät jälkeen, JJ:llä on puutteellisin tiedoin varustettu valmentaja joka voi antaa ohjelman vastaisia tai jopa terveydelle haitallisia neuvoja. Valmentaja ja sovelluksen todellisuus EIVÄT saa erkaantua. Tämä koskee erityisesti: uudet/poistetut liikkeet, muuttuneet rajoitteet, uudet aikaperustaiset tai kehon paino -liikkeet, tavoitemuutokset.
+
 ---
 
 ## VALMIS ✅ — AI-valmentajan keskustelumuisti (toteutettu v3.0:ssa)
@@ -47,6 +49,71 @@ Tämä lista koottiin v3.1:n jälkeen. Ehdotettu järjestys: kevyet ja terveysre
 5. **Pikakysymykset päivitettävä uuteen tavoitteeseen** (Clauden bongaus, kosmeettinen). Valmentaja-välilehden pikakysymykset ovat yhä vanhoja ("Penkki ei nouse" jne.). Terveys on nyt ykköstavoite → esim. yksi kysymys "Selkä/olkapää-ystävällinen vaihtoehto liikkeelle X". Voi tehdä minkä tahansa version yhteydessä. Prioriteetti: matala.
 
 *(Iso, oma projektinsa — ei vielä v3.2:een):* Pitkän aikavälin muisti + periodisaatio = alla oleva kohta 1. Kytkeytyy kohtaan 3 (historia-seuranta).
+
+---
+
+### 📚 PDF-ANALYYSIN LÖYDÖKSET (Claude kävi projektin PDF:t läpi 18.9.2026)
+
+JJ pyysi käymään projektin ladatut PDF:t läpi ja vertaamaan sovelluksen nykytilaan. Löytyi kaksi merkittävää aukkoa liikekirjastossa. Nämä ovat SISÄLTÖ-lisäyksiä (uusia liikkeitä), eivät koodimuutoksia — helppo toteuttaa lisäämällä EXERCISE_LIBRARY-listaan app2.js:ssä.
+
+**AUKKO 1 (tärkein) — MedBridge TOS-liikkeet puuttuvat kokonaan.**
+MedBridge-PDF on lääketieteellinen fysioterapiaohje juuri JJ:n TOS-vaivaan. Sisältää 5 liikettä, joista MIKÄÄN ei ole kirjastossa. Nämä ovat liikkuvuus-/mobilisointiliikkeitä (ei voimaliikkeitä) — vastaavat suoraan TODO:n fokusta (rintarangan liikkuvuus, lapatuki, rintakehän avaus). Suositus: lisää uusi kategoria "Liikkuvuus & TOS (fysioterapia)" kirjastoon:
+   - Rintalihaksen venytys oviaukossa (120° abduktio) — Single Arm Doorway Pec Stretch
+   - Lapaluiden veto yhteen istuen (Seated Scapular Retraction) — HUOM: tämä on suoraan penkin "lapatuki"-tekniikan harjoitusliike
+   - Hartioiden pyöritykset istuen (Shoulder Shrug Circles)
+   - Lumienkeli foam rollin päällä (Snow Angels on Foam Roll) — rintarangan avaus
+   - Rintakehän mobilisointi pallolla (Chest Mobilization with Small Ball)
+   Nämä ovat aikaperustaisia/toistoperustaisia venytyksiä — ei painoa. Merkitään kehon paino / aika.
+
+**AUKKO 2 — Ryhtiä ja lapatukea tukevat vetoliikkeet puuttuvat.**
+Projektin selkä/ryhti-ohjelma JA Tsemppi-penkkiopas korostavat molemmat näitä. Profiili mainitsee "1.5-2× vetävää työntävää kohden" ja lapatuen, mutta kirjastosta puuttuu:
+   - Face pull / Takaolkapään veto kasvoille (taljassa) — KESKEINEN ryhdille & olkapään terveydelle, Tsemppi-opas suosittaa olkapään ennaltaehkäisyssä. Lisää kategoriaan Olkapäät tai Selkä.
+   - Reverse fly / Käänteiset flyes (käsipainoilla tai taljassa) — takaolkapää & yläselkä, ryhti
+   - Pallof-punnerrus (anti-rotaatio core, selkäystävällinen) — lisää Vatsa/keskivartalo-kategoriaan
+   - (Face pull ja reverse fly tukevat myös TOS:ia: vahvistavat lapaluun vetäjiä, avaavat rintakehää)
+
+**PIENI TARKENNUS 3 — penkkiohje on jo kunnossa, mutta profiiliin voisi lisätä nyansseja.**
+Vertasin sovelluksen penkkiohjetta molempiin penkkioppaisiin (NHA/Nuckols + Tsemppi). Ydinasiat (45° kyynärpäät, lapatuki, kevyt notko) ovat oikein ja katettu. Ei-kriittisiä lisäyksiä joita VOISI lisätä valmentajan profiiliin jos halutaan tarkennusta:
+   - "Purista tankoa voimakkaasti" (aktivoi kyynärvarren & olkavarren lihakset)
+   - Tangon liikerata: laske rintalastan alaosaan/nännien tasolle, nosta viistosti ylös JA hieman taakse (kohti kasvoja) — ei suoraan ylös
+   - Laskuvaihe hallittu 2-3 s, kevyt kosketus rintaan (ei pompautusta)
+   - Nämä ovat "nice to have" — nykyohje riittää turvallisuuteen. Prioriteetti: matala.
+
+**Ehdotettu prioriteetti näille:** AUKKO 1 (MedBridge TOS-liikkeet) on arvokkain, koska se on suoraan JJ:n vaivaan kohdennettua eikä sitä ole lainkaan. AUKKO 2 toiseksi tärkein (ryhti + lapatuki). Molemmat ovat pientä työtä (liikkeiden lisäys kirjastoon). Sopisivat hyvin v3.2:een yhdessä kohdan 1 (per-puoli-toistot) kanssa.
+
+---
+
+### ✅ SOVITTU v3.2:een — TOS/ryhti-liikkeiden lisäys VAKIO-OHJELMAAN (JJ + Claude 18.9.2026)
+
+JJ päätti että olennaisimmat kuntouttavat liikkeet lisätään vakio-ohjelmaan (ei vain kirjastoon), koska kirjastoon jäävät liikkeet jäävät helposti tekemättä. EHDOTON reunaehto: treeni EI saa venyä paljoa — JJ inhoaa pitkiä salikäyntejä. Ratkaisu: lisätään vain lyhyitä liikkuvuus-/aktivointiliikkeitä (~1-2 min), ei raskaita voimaliikkeitä.
+
+**Fysiologinen perustelu sijoittelulle (Clauden suositus, JJ hyväksyi):**
+- ALKUUN kuuluu AKTIVOINTI, ei venyttely. Kevyt lapatuki-aktivointi ennen penkkiä/soutua tekee nostoista turvallisempia ja vahvempia (lavat valmiina tukemaan). HUOM: pitkiä staattisia venytyksiä EI ennen voimaliikkeitä — ne voivat hetkellisesti heikentää voimantuottoa.
+- LOPPUUN kuuluu LIIKKUVUUS/HUOLTO (venyttely). Lämpimänä venytys on tehokkainta eikä haittaa suoritusta.
+
+**TOTEUTETTAVA v3.2:ssa — DEFAULT_PLAN app2.js:ssä:**
+
+Treeni A (työntöpäivä):
+- ALKUUN (ennen penkkiä): Lapaluiden veto yhteen istuen — aktivointi, ~1-2 min. Herättää lapatuen, tukee penkin lapatuki-tekniikkaa. Aikaperustainen tai toistot, ei painoa.
+- LOPPUUN (nykyisen lankun jälkeen tai tilalle harkittava): Rintalihaksen venytys oviaukossa (120° abduktio) — huolto, avaa rinnan penkin jälkeen. Aikaperustainen (esim. 2×30s/puoli).
+
+Treeni B (vetopäivä):
+- ALKUUN: Lapaluiden veto yhteen istuen — sama aktivointi kuin A:ssa.
+- LOPPUUN: Lumienkeli foam rollilla (Snow Angels) — huolto, rintarangan avaus. Aikaperustainen/toistot.
+
+Nettovaikutus: liikkeitä per treeni 5 → 7, MUTTA kaksi uutta ovat lyhyitä (ei raskaita sarjoja/lepoja) → aikalisä vain ~3-4 min. JJ hyväksyi tämän aikavaikutuksen.
+
+**TÄRKEÄ VARAUS (kirjattava myös kun rakennetaan):** Claude ei ole lääkäri/fysioterapeutti. MedBridge-ohje on yleinen TOS-ohje, ei henkilökohtainen. JJ:n kannattaa vahvistaa fysioterapeutilta/lääkäriltä että juuri nämä liikkeet (erit. face pull ja overhead-tyyppiset) sopivat hänelle, koska TOS-oireet liittyvät käsien yläasentoon. JJ on tietoinen tästä.
+
+**MYÖS v3.2:ssa — lisää uusi kirjastokategoria "Liikkuvuus & TOS (fysioterapia)":** kaikki 5 MedBridge-liikettä + face pull + reverse fly + Pallof-punnerrus (ks. AUKKO 1 ja AUKKO 2 yllä). Näin muutkin kuin vakio-ohjelmaan valitut ovat saatavilla.
+
+**MYÖS v3.2:ssa — PÄIVITÄ AI-VALMENTAJAN TIEDOT (PROFILE app2.js) uusien liikkeiden mukaan.** Kolme asiaa jotka valmentajan pitää oppia:
+1. Uudet liikkuvuus-/aktivointiliikkeet (lapaluiden veto, rintalihaksen venytys, lumienkeli) ovat AKTIVOINTIA/HUOLTOA, EIVÄT progressiokohteita. Tavoite = laatu ja liikkuvuus, EI kuorman nousu. Valmentaja ei saa ehdottaa "lisää painoa" näihin eikä analysoida niitä kuin voimaliikkeitä.
+2. Ohjelman rakenne-logiikka: aktivointi alkuun (herättää lapatuen ennen penkkiä/soutua), huoltovenytys loppuun (lämpimänä tehokkainta). Jotta valmentaja osaa vastata järkevästi jos JJ kysyy niistä.
+3. Nämä TOS-liikkeet ovat SUOJATTUJA — valmentaja EI saa ehdottaa niiden poistamista "ajan säästämiseksi", vaikka profiilissa lukee että JJ inhoaa pitkiä treenejä. Ne ovat siellä terveyssyistä.
+(Tämä on osa yllä olevaa pysyvää synkronointisääntöä — kirjattu tähän erikseen ettei unohdu juuri tässä versiossa.)
+
+**Tekninen huomio rakennusvaiheeseen:** uudet aikaperustaiset liikkeet pitää lisätä isTimeBased-tunnistukseen (nimet TIME_BASED_KEYWORDS-listaan: esim. "venytys", "lumienkeli", "lapaluiden veto" jos aikaperustainen) JA getWeightMode tunnistaa ne kehon painoksi/ilman painoa. Muuten ne näyttävät "0×10".
 
 ---
 
