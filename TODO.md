@@ -36,9 +36,9 @@ Katso tarkemmat tiedot CHANGELOG:sta v3.1.
 
 Tämä lista koottiin v3.1:n jälkeen. Ehdotettu järjestys: kevyet ja terveysrelevantit ensin.
 
-1. **Toistojen per-puoli-erittely** (JJ:n toive). Sivulankku, lintukoira, dead bug ym. yksipuoliset: mahdollisuus merkitä toistot "per puoli" (repMode = 'per-puoli'). Paino-puoli hoidettu jo v3.1:ssä, tämä on toistojen vastaava lisä. Rajattu, selkeä. Prioriteetti: korkea.
+1. **Toistojen per-puoli-erittely** (JJ:n toive). Sivulankku, lintukoira, dead bug ym. yksipuoliset: mahdollisuus merkitä toistot "per puoli" (repMode = 'per-puoli'). Paino-puoli hoidettu jo v3.1:ssä, tämä on toistojen vastaava lisä. Rajattu, selkeä. **Prioriteetti: korkein — luontevin aloituskohta v3.2:lle.**
 
-2. **Progressioehdotus fiksummaksi per liiketyyppi** (Clauden bongaus). Nyt `suggestNextWeight` ehdottaa +2,5 kg kaikille. Käsipainoliikkeissä (Arnold press, vasarakääntö) se on käytännössä +5 kg kokonaiskuormaa, ja käsipainot nousevat usein 2 kg pykälin. Ehdotus voisi olla liiketyyppikohtainen (käsipaino per käsi = pienempi askel). Pieni, terveysrelevantti. Prioriteetti: korkea.
+2. **Progressioehdotus fiksummaksi per liiketyyppi** (Clauden bongaus). Nyt `suggestNextWeight` ehdottaa +2,5 kg kaikille. HUOM (JJ:n tarkennus 18.9.): JJ:n salin käsipainot nousevat 2,5 kg välein, joten +2,5 kg/käsi on itse asiassa jo OIKEA askel sekä tangolle että käsipainoille → tämä ei ole kiireellinen JJ:lle. Kentät hyväksyvät joka tapauksessa minkä tahansa vapaan arvon (16, 17.5 jne.), joten ehdotuksen epätarkkuudesta ei ole käytännön haittaa. Jää nice-to-have -tasolle. Prioriteetti: laskettu matalaksi.
 
 3. **Historia-seuranta muillekin liikkeille kuin penkki** (Clauden bongaus). Nyt Historia-sivun kehityskaavio on kovakoodattu vain id:hen 'bench'. Laajennus: valittava mitä liikettä seuraa (esim. Arnold press, tuettu soutu). Tukee uutta terveys-ensin-tavoitetta. Keskisuuri. Prioriteetti: keskitaso.
 
