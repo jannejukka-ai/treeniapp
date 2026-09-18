@@ -486,6 +486,15 @@ body {
   text-align: center;
 }
 .sets-col-label:first-child { text-align: left; }
+.col-hint {
+  display: block;
+  font-size: 9px;
+  font-weight: 400;
+  color: var(--text2);
+  opacity: 0.75;
+  margin-top: 1px;
+  line-height: 1.1;
+}
 .sets-container { display: flex; flex-direction: column; gap: 6px; }
 .set-row {
   display: grid;
