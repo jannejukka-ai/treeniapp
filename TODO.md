@@ -54,6 +54,41 @@ Toteutettu koko v3.2-jono, kohdat **A, B, C ja D**. Tiivistetysti:
 
 ---
 
+### ⚠️ ORTOPEDIN OHJEET — KIRJATTAVA KOODIIN (JJ tarkensi 22.9.2026)
+
+**Konteksti:** JJ:n viimeisimmässä ortopedin käyntitekstissä: *"Nostojen myötä tullut varsin hankalaksi yltynyt kummankin kyljen ja ylävatsan kipuoire. TT-kuvissa TH VIII–IX–X alueessa fyyttinokkia, lähes siltaavaa luutumista edessä. Foraminat kaventuneet. Jatkossa harjoittelussa tulisi huomioida nämä ja korvata perinteisiä harjoitteita modifioiduilla kuormituksilla."*
+
+**A) SELÄN OJENNUS PENKISSÄ — tekniikka on ortopedin antama ja se PUUTTUU koodista.**
+Nykytila: liike on kirjastossa merkinnällä "ortopedin suosima", mutta ilman tekniikkaohjetta. Tämä on riski, koska liikkeen TAVANOMAINEN suoritustapa (yliojennus yläasennossa) on juuri se jota pitää välttää. Pelkkä "ortopedin suosima" voi johtaa väärään suoritukseen.
+
+Ortopedin ohje sellaisena kuin JJ sen kertoi:
+- Tuki nostetaan hieman nivusia YLEMMÄS (ei lantion taitteen alle)
+- Liike tehdään KEHON PAINOLLA — ei lisäpainoa
+- Selkä nostetaan pyöristetystä asennosta ylös alhaalta lähtien, nikama nikamalta
+- EI YLIOJENNUSTA yläasennossa
+
+Miksi tuen korkeus ratkaisee (mekaniikka): tuki lantion taitteen ALApuolella → liike tapahtuu lonkista (pakara-/takareisiliike). Tuki YLEMPÄNÄ → liike siirtyy selkärankaan. Ortopedi on siis muuttanut liikkeen tarkoituksella selän hallituksi liikkuvuusharjoitteeksi, ei voimaliikkeeksi.
+
+TEHTÄVÄ v3.3:een:
+1. Lisää tekniikkaohje liikkeen `note`-kenttään kirjastossa (lyhyt versio yllä olevasta)
+2. Lisää sama valmentajan PROFILE-tekstiin, ja kielto ehdottaa tähän lisäpainoa
+3. Merkitse liike huoltoliikkeeksi (`isMobility`) ettei siihen ehdoteta progressiota — HUOM: nimessä ei ole nykyisiä MOBILITY_KEYWORDS-avainsanoja, joten lisää tunnistus erikseen
+4. ÄLÄ lisää liikettä vakio-ohjelmaan ilman JJ:n erillistä hyväksyntää
+
+**B) KÄSILLÄ ROIKKUMINEN + POLVENNOSTO — myös ortopedin suora suositus.** Sama puute: kirjastossa ilman tekniikkaohjetta. Avoin kysymys JJ:llä vastaanotolle: kuinka pitkään kerrallaan, ja onko käsien puutuminen (TOS) syy lopettaa. Kirjaa ohje koodiin kun vastaus on saatu.
+
+**C) AVOIMET KYSYMYKSET JOTKA JJ VIE VASTAANOTOLLE** (muistilista tehty 22.9.2026). Kun vastaukset tulevat, ne koodataan sekä liikevalintoihin että PROFILE-tekstiin — tämä on todennäköisesti arvokkaampi v3.3 kuin mikään alla olevista ehdokkaista:
+1. Saako tehdä raskasta penkkipunnerrusta (3×5–8 @ 90 kg)? Tämä on ollut TODO:ssa avoimena jo v3.1:stä.
+2. Saako selkää ojentaa taaksepäin kuormitettuna? (Yksi vastaus ratkaisee usean liikkeen kohtalon.)
+3. Entä kierto ja sivutaivutus (sivulankku)?
+4. Käsien yläasento — ongelma myös rintarangan kannalta, ei vain TOS:n?
+5. Selän ojennus penkissä: kuinka ylös liike saa jatkua — pysähtyykö lannerangan neutraaliin vai saako rintarankaa (TH VIII–X) ojentaa mukana?
+6. Erityisesti varmistettavat ohjelmaliikkeet: Ylätalja (70 kg), sivulankku, lantionnosto, Arnold press, sekä v3.2:n uudet rintalihaksen venytys oviaukossa ja lumienkeli foam rollilla.
+
+**HUOM Claudelle:** Claude ei ole lääkäri eikä fysioterapeutti. Yllä olevat ovat JJ:n raportoimia ortopedin ohjeita, eivät Clauden arvioita. Jos JJ:n kertoma ja koodissa oleva ovat ristiriidassa, kysy JJ:ltä — älä päättele itse.
+
+---
+
 ### 🎯 SEURAAVA VERSIO (v3.3) — ehdokkaat (päivitetty 22.9.2026)
 
 v3.2:n kohdat A–D on tehty. Jäljellä olevat, priorisoitu järjestys:
@@ -165,7 +200,7 @@ Käyttäjällä on KOLME päällekkäistä vaivaa jotka vaikuttavat ohjelmaan:
 1. Kulmasoutu → tuettu soutu (taljasoutu istuen tai tuettu käsipainosoutu)
 2. Hartiaprässi → ARNOLD PRESS (käyttäjän valinta; kulma/liikerata-ystävällinen)
 3. Hauiskääntö → vasarakääntö tai taljakääntö V-kahvalla (nivelystävällinen kulma)
-4. Harkitse lisättäviä: roikkuminen + polvennosto, selkäpunnerruspenkki
+4. Harkitse lisättäviä: roikkuminen + polvennosto, selkäpunnerruspenkki (HUOM: molempien tekniikkaohjeet tarkennettu 22.9.2026 — ks. osio "ORTOPEDIN OHJEET — KIRJATTAVA KOODIIN" yllä)
 5. PÄIVITÄ PROFILE-teksti app2.js:ssä: kaikki kolme vaivaryhmää (selkä T8-9/T10 + L4-5, TOS + hermo-oireet, olkavarsi/kyynärpää-oireet) JA uudet tavoitteet (terveys ensisijaiseksi). Mainitse myös kulma-ongelma (overhead ok, mutta liikerata tärkeä; hauiskäännöissä ei vaakakämmentä).
 6. Liikekirjaston päivitys: lisää turvalliset vaihtoehdot (tuettu soutu, Arnold press, vasarakääntö/V-kahva-taljakääntö, roikkuminen+polvennosto, selkäpunnerruspenkki)
 7. Varmista ortopedilta: raskas PENKKIPUNNERRUS ok (lantion notko)?
