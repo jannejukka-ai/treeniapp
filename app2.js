@@ -2,30 +2,102 @@
 // TREENIAPP — Sovelluksen päälogiikka (v2: muokattavat liikkeet)
 // ============================================================
 
+// ============================================================
+// TOS- JA RYHTILIIKKEET (v3.2) — aktivointi alkuun, huolto loppuun
+// ============================================================
+// Nämä ovat fysioterapeuttista huoltoa, EIVÄT voimaliikkeitä.
+// Ei painoa, ei progressiota. Määritelty omina vakioinaan, koska niitä
+// käytetään sekä oletusohjelmassa että vanhan ohjelman päivityksessä.
+const TOS_ACTIVATION = {
+  id: 'scap', name: 'Lapaluiden veto yhteen istuen',
+  sets: 2, reps: '10', weight: 0, unit: 'kg',
+  note: 'AKTIVOINTI alkuun — purista lapaluut yhteen ja alas n. 3 s, hartiat eivät nouse. Ei painoa, ei progressiota.'
+};
+const TOS_PEC_STRETCH = {
+  id: 'pecstretch', name: 'Rintalihaksen venytys oviaukossa',
+  sets: 2, reps: '30 s/puoli', weight: 0, unit: 'kg',
+  note: 'HUOLTO loppuun — kyynärpää n. 120° kulmassa, kevyt venytys, älä kohota hartiaa. Ei painoa.'
+};
+const TOS_SNOW_ANGEL = {
+  id: 'snowangel', name: 'Lumienkeli foam rollilla',
+  sets: 2, reps: '10', weight: 0, unit: 'kg',
+  note: 'HUOLTO loppuun — rintarangan avaus. Sormet pysyvät lattiassa, alaselkä ei notkolle. Ei painoa.'
+};
+
 // OLETUS-treenijako. Käytetään vain ensimmäisellä kerralla.
 // Tämän jälkeen käyttäjän omat muutokset tallentuvat muistiin.
 const DEFAULT_PLAN = {
   A: {
     name: 'Treeni A — Yläkroppa (työntö) + Etujalat',
     exercises: [
+      { ...TOS_ACTIVATION },
       { id: 'bench', name: 'Penkkipunnerrus', sets: 3, reps: '5–8', weight: 90, unit: 'kg', note: 'Kyynärpäät ~45° kylkiin (ei 90°), lavat taakse+alas, vain kevyt selän notko' },
-      { id: 'lat', name: 'Ylätalja / Leuanveto', sets: 3, reps: '8–10', weight: 70, unit: 'kg', note: 'Yläselkä vastapainoksi' },
+      { id: 'lat', name: 'Ylätalja', sets: 3, reps: '8–10', weight: 70, unit: 'kg', note: 'Yläselkä vastapainoksi — edestä tuleva veto' },
       { id: 'bsq', name: 'Bulgarialainen split-kyykky', sets: 3, reps: '8–10/jalka', weight: 0, unit: 'kg', note: 'Etureidet & tasapaino — selkäystävällinen' },
       { id: 'tri', name: 'Ojentajapunnerrus taljassa', sets: 2, reps: '10–12', weight: 25, unit: 'kg', note: 'Penkin avuksi (dipin sijaan, säästää olkapäitä)' },
       { id: 'plank', name: 'Lankku', sets: 3, reps: '30–45 s', weight: 0, unit: 'kg', note: 'Keskivartalon tuki — selkäystävällinen' },
+      { ...TOS_PEC_STRETCH },
     ]
   },
   B: {
     name: 'Treeni B — Yläkroppa (veto) + Takajalat',
     exercises: [
+      { ...TOS_ACTIVATION },
       { id: 'hip', name: 'Lantionnosto', sets: 3, reps: '10–12', weight: 40, unit: 'kg', note: 'Pakarat & takareidet — selkäystävällinen (selkä tuettuna)' },
       { id: 'row', name: 'Tuettu taljasoutu istuen', sets: 3, reps: '8–10', weight: 70, unit: 'kg', note: 'Keskiselkä — rinta tuettuna, selkäystävällinen (ei kulmasoutua)' },
       { id: 'ohp', name: 'Arnold press istuen', sets: 2, reps: '10–12', weight: 20, unit: 'kg', note: 'Olkapäät — vapaa liikerata & säädettävä kulma (TOS-ystävällinen)' },
       { id: 'curl', name: 'Vasarakääntö', sets: 2, reps: '10–12', weight: 14, unit: 'kg', note: 'Käsivarret — neutraali ranne (ei vaakakämmentä, nivelystävällinen)' },
       { id: 'splank', name: 'Sivulankku', sets: 2, reps: '20–30 s/puoli', weight: 0, unit: 'kg', note: 'Vinot vatsalihakset — tukee selkää sivusuunnassa' },
+      { ...TOS_SNOW_ANGEL },
     ]
   }
 };
+
+// ============================================================
+// OHJELMAN AUTOMAATTINEN PÄIVITYS (migraatio)
+// ============================================================
+// Käyttäjän oma treenijako on tallennettu selaimen muistiin. Kun oletusohjelmaan
+// tulee terveyssyistä uusia liikkeitä, ne pitää lisätä myös tallennettuun
+// ohjelmaan — muuten ne eivät koskaan näy käyttäjälle. Tämä ajetaan kerran.
+const PLAN_MIGRATION_VERSION = 2; // 2 = v3.2 (TOS-liikkeet + Ylätalja-nimi)
+
+function migratePlan() {
+  const saved = localStorage.getItem('plan');
+  if (!saved) return; // ei omaa tallennettua ohjelmaa → oletus on jo ajan tasalla
+
+  const done = parseInt(localStorage.getItem('planMigration') || '0', 10);
+  if (done >= PLAN_MIGRATION_VERSION) return;
+
+  let plan;
+  try { plan = JSON.parse(saved); } catch (e) { return; }
+
+  const additions = {
+    A: { start: TOS_ACTIVATION, end: TOS_PEC_STRETCH },
+    B: { start: TOS_ACTIVATION, end: TOS_SNOW_ANGEL },
+  };
+
+  ['A', 'B'].forEach(key => {
+    const w = plan[key];
+    if (!w || !Array.isArray(w.exercises)) return;
+
+    // D) "Ylätalja / Leuanveto" → "Ylätalja" (painomerkintä meni väärin)
+    w.exercises.forEach(ex => {
+      if (ex.id === 'lat' && /leuanveto/i.test(ex.name || '')) {
+        ex.name = 'Ylätalja';
+        ex.note = 'Yläselkä vastapainoksi — edestä tuleva veto';
+      }
+    });
+
+    // A) Lisää TOS-aktivointi alkuun ja huoltoliike loppuun, jos puuttuvat
+    const has = id => w.exercises.some(ex => ex.id === id);
+    const add = additions[key];
+    if (add.start && !has(add.start.id)) w.exercises.unshift({ ...add.start });
+    if (add.end && !has(add.end.id)) w.exercises.push({ ...add.end });
+  });
+
+  localStorage.setItem('plan', JSON.stringify(plan));
+  localStorage.setItem('planMigration', String(PLAN_MIGRATION_VERSION));
+}
 
 // LIIKEKIRJASTO — valmiit vaihtoehdot ryhmiteltynä.
 // Selkä- ja polviystävälliset liikkeet on merkitty.
@@ -79,9 +151,19 @@ const EXERCISE_LIBRARY = {
     { name: 'Sivulankku', note: 'Selkäystävällinen — vinot vatsalihakset' },
     { name: 'Lintukoira', note: 'Selkäystävällinen — fysioterapiassa suositeltu' },
     { name: 'Kuollut hyönteinen (dead bug)', note: 'Selkäystävällinen — syvät vatsalihakset' },
+    { name: 'Pallof-punnerrus', note: 'Anti-rotaatio — selkäystävällinen core' },
     { name: 'Vatsarutistus', note: '' },
     { name: 'Polvien nosto riipunnasta', note: 'Alavatsa' },
     { name: 'Vuoristokiipeilijä', note: 'Core + syke' },
+  ],
+  'Liikkuvuus & TOS (fysioterapia)': [
+    { name: 'Lapaluiden veto yhteen istuen', note: 'Aktivointi alkuun — lapatuki (MedBridge TOS)' },
+    { name: 'Hartioiden pyöritykset istuen', note: 'Lämmittely — hartiarenkaan liikkuvuus (MedBridge TOS)' },
+    { name: 'Rintalihaksen venytys oviaukossa', note: 'Huolto loppuun — avaa rinnan etuosan (MedBridge TOS)' },
+    { name: 'Lumienkeli foam rollilla', note: 'Huolto loppuun — rintarangan avaus (MedBridge TOS)' },
+    { name: 'Rintakehän mobilisointi pallolla', note: 'Huolto — rintalihaksen pehmytkudos (MedBridge TOS)' },
+    { name: 'Takaolkapään veto kasvoille (face pull)', note: 'Ryhti & olkapään terveys — lapatuki' },
+    { name: 'Käänteiset vipunostot (reverse fly)', note: 'Takaolkapää & yläselkä — ryhti' },
   ],
 };
 
@@ -118,12 +200,26 @@ PENKKIPUNNERRUKSEN TURVATEKNIIKKA (tärkeä TOS:n ja selän takia — ohjeista a
 - Lapaluut vedetään taakse ja alas ENNEN noston aloittamista (vankka alusta + tilaa rintakehän yläaukeamalle).
 - Selkä: vain kevyt luonnollinen notko — EI voimakasta voimanostokaarta. Lantio pysyy penkissä, jalat tukevasti maassa.
 
-PROGRESSIO: sovella hypertrofisen harjoittelun periaatteita — 2–3 treeniä/viikko, 8–12 toistoa, 2–3 sarjaa/liike. Terveys ja kivuttomuus menevät aina kuorman lisäyksen edelle.
+LIIKKUVUUS- JA AKTIVOINTILIIKKEET — LUE TÄMÄ HUOLELLA (tärkeä):
+Ohjelmassa on lyhyitä TOS-/ryhtiliikkeitä, jotka ovat fysioterapeuttista HUOLTOA, EIVÄT voimaliikkeitä:
+- "Lapaluiden veto yhteen istuen" — AKTIVOINTI, molempien treenien ALUSSA
+- "Rintalihaksen venytys oviaukossa" — HUOLTO, treeni A:n LOPUSSA
+- "Lumienkeli foam rollilla" — HUOLTO, treeni B:n LOPUSSA
+(Samaan ryhmään kuuluvat myös: hartioiden pyöritykset istuen, rintakehän mobilisointi pallolla.)
+
+Säännöt näille liikkeille:
+1. EI PROGRESSIOTA. Älä koskaan ehdota painon lisäämistä tai toistojen kasvattamista näihin, äläkä analysoi niitä kuten voimaliikkeitä. Tavoite on liikkeen LAATU ja liikkuvuus, ei kuorma. Jos niissä näkyy paino 0, se on oikein.
+2. RAKENNE-LOGIIKKA: aktivointi kuuluu treenin ALKUUN, koska se herättää lapatuen ennen penkkiä ja soutua ja tekee nostoista turvallisempia. Pitkiä staattisia venytyksiä EI tehdä ennen voimaliikkeitä, koska ne voivat hetkellisesti heikentää voimantuottoa. Huoltovenytys kuuluu LOPPUUN, jolloin keho on lämmin ja venytys tehokkainta.
+3. NÄMÄ OVAT SUOJATTUJA LIIKKEITÄ. Älä koskaan ehdota niiden poistamista, lyhentämistä tai ohittamista "ajan säästämiseksi", vaikka käyttäjä ei pidä pitkistä treeneistä. Ne ovat ohjelmassa terveyssyistä ja vievät yhteensä vain muutaman minuutin.
+4. Nämä perustuvat yleiseen TOS-fysioterapiaohjeeseen (MedBridge), eivät käyttäjälle henkilökohtaisesti määrättyyn ohjelmaan. Jos käyttäjä kysyy niistä tarkemmin tai raportoi oireita niiden aikana, muistuta että fysioterapeutti tai lääkäri vahvistaa sopivuuden.
+
+PROGRESSIO: sovella hypertrofisen harjoittelun periaatteita — 2–3 treeniä/viikko, 8–12 toistoa, 2–3 sarjaa/liike. Terveys ja kivuttomuus menevät aina kuorman lisäyksen edelle. Progressio koskee VAIN voimaliikkeitä, ei yllä mainittuja huoltoliikkeitä.
 Treenifrekvenssi: 2 kertaa viikossa (realistinen tavoite).
-Treenijako: A (Yläkroppa työntö + Etujalat) ja B (Yläkroppa veto + Takajalat) vuorotellen. Molemmissa keskivartaloliike (lankku/sivulankku) lopussa — tärkeä selän tuelle.
+Treenijako: A (Yläkroppa työntö + Etujalat) ja B (Yläkroppa veto + Takajalat) vuorotellen. Rakenne molemmissa: lapatuen aktivointi alussa → voimaliikkeet → keskivartaloliike (lankku/sivulankku) → huoltoliike lopussa.
 
 MERKINNÄT KIRJAUKSISSA:
 - Lankut ja sivulankut mitataan sekunneissa, ei painossa. Näissä progressio = pidempi kesto, ei lisäpaino.
+- Yksipuoliset liikkeet (sivulankku, lintukoira, split-kyykky, askelkyykky, yhden käden soutu, oviaukkovenytys) merkitään PER PUOLI. Jos kirjauksessa lukee esim. "25s/puoli" tai "12×10/puoli", luku tarkoittaa yhtä puolta — älä tulkitse sitä kokonaismääräksi.
 - Painon merkintätapa vaihtelee liikkeen mukaan: käsipainoliikkeissä paino on yleensä PER KÄSI, talja- ja tankoliikkeissä YHTEENSÄ, ja kehon paino -liikkeissä (punnerrus, leuanveto, dippi) "kehon paino" tai "kehon paino + lisäpaino". Huomioi tämä kun vertaat painoja liikkeiden välillä.
 - RPE (1–10, koettu kuormittavuus) voi olla kirjattuna per liike. Käytä sitä progression suunnitteluun kun se on annettu.
 
@@ -242,6 +338,10 @@ function renderExerciseList(workoutKey, plan, sessions) {
   const list = document.getElementById('exercise-list');
   list.innerHTML = '';
 
+  // "Pääliike"-merkki kuuluu ensimmäiselle varsinaiselle voimaliikkeelle,
+  // ei alun aktivointiliikkeelle
+  const mainIdx = plan.exercises.findIndex(e => !isMobility(e.name));
+
   plan.exercises.forEach((ex, i) => {
     const lastSession = [...sessions].reverse().find(s =>
       s.exercises && s.exercises.some(e => e.id === ex.id)
@@ -263,7 +363,10 @@ function renderExerciseList(workoutKey, plan, sessions) {
       lastMaxWeight = lastEx.actualWeight; // vanha data
     }
 
-    if (lastMaxWeight && lastMaxWeight > 0) {
+    if (isMobility(ex.name)) {
+      // Huolto-/aktivointiliike: ei painoehdotusta, ei progressiota
+      badgeHtml = '<span class="badge badge-care">Huolto</span>';
+    } else if (lastMaxWeight && lastMaxWeight > 0) {
       const suggestion = suggestNextWeight(ex.id, lastEx, lastMaxWeight, ex.name);
       if (suggestion > lastMaxWeight) {
         detailText = ex.reps + ' @ ' + suggestion + ' kg';
@@ -272,7 +375,7 @@ function renderExerciseList(workoutKey, plan, sessions) {
         detailText = ex.reps + ' @ ' + lastMaxWeight + ' kg';
         badgeHtml = '<span class="badge badge-done">Sama</span>';
       }
-    } else if (i === 0) {
+    } else if (i === mainIdx) {
       badgeHtml = '<span class="badge badge-next">Pääliike</span>';
     }
 
@@ -303,7 +406,7 @@ function renderExerciseList(workoutKey, plan, sessions) {
 const TIME_BASED_EXERCISES = ['plank', 'splank'];
 
 // Nimet joista tunnistetaan aikaperustainen liike (kirjaston liikkeille joilla ei ole kiinteää id:tä)
-const TIME_BASED_KEYWORDS = ['lankku', 'lankutus', 'sivulankku', 'lintukoira', 'dead bug', 'hyönteinen', 'vuoristokiipeilijä'];
+const TIME_BASED_KEYWORDS = ['lankku', 'lankutus', 'sivulankku', 'lintukoira', 'dead bug', 'hyönteinen', 'vuoristokiipeilijä', 'venytys', 'mobilisointi'];
 
 function isTimeBased(exerciseId, exerciseName) {
   if (TIME_BASED_EXERCISES.includes(exerciseId)) return true;
@@ -312,6 +415,44 @@ function isTimeBased(exerciseId, exerciseName) {
     return TIME_BASED_KEYWORDS.some(k => n.includes(k));
   }
   return false;
+}
+
+// ============================================================
+// HUOLTO- JA AKTIVOINTILIIKKEET (v3.2)
+// ============================================================
+// Näitä ei progressoida painolla eikä niille ehdoteta painonlisäystä.
+const MOBILITY_KEYWORDS = ['lapaluiden veto', 'venytys', 'lumienkeli', 'mobilisointi', 'pyöritykset'];
+
+function isMobility(exerciseName) {
+  if (!exerciseName) return false;
+  const n = exerciseName.toLowerCase();
+  return MOBILITY_KEYWORDS.some(k => n.includes(k));
+}
+
+// ============================================================
+// TOISTOJEN MERKINTÄ — per puoli vai yhteensä (v3.2)
+// ============================================================
+// Palauttaa: 'per-puoli' | 'normaali'
+// Käyttäjä voi ylikirjoittaa tämän liikkeelle asettamalla ex.repMode.
+const PER_SIDE_KEYWORDS = [
+  'sivulankku', 'lintukoira', 'dead bug', 'hyönteinen',
+  'split-kyykky', 'askelkyykky', 'yhden käden',
+  'oviaukossa', 'mobilisointi', 'pallof'
+];
+
+function getRepMode(ex) {
+  if (ex && ex.repMode) return ex.repMode;
+  const name = ((ex && ex.name) || '').toLowerCase();
+  if (PER_SIDE_KEYWORDS.some(k => name.includes(k))) return 'per-puoli';
+  return 'normaali';
+}
+
+// Kirjauksen toistosarakkeen otsikko ja pieni vihje sen alle
+function getRepColumnLabel(ex) {
+  const timeBased = isTimeBased(ex && ex.id, ex && ex.name);
+  const base = timeBased ? 'Sekunnit' : 'Toistot';
+  const hint = getRepMode(ex) === 'per-puoli' ? '<span class="col-hint">per puoli</span>' : '';
+  return base + hint;
 }
 
 // ============================================================
@@ -329,7 +470,9 @@ function getWeightMode(ex) {
   // HUOM: "punnerrus" on tarkoituksella POIS listalta, koska penkkipunnerrus,
   // pystypunnerrus ym. eivät ole kehon paino -liikkeitä. Push-up on suomeksi
   // yleensä "punnerrus" yksinään — käsitellään erillisellä tarkalla säännöllä.
-  const bodyweightKeywords = ['leuanveto', 'dippi', 'dippaus', 'roikku', 'polvennosto', 'polvien nosto', 'lankku', 'lankutus', 'lintukoira', 'hyönteinen', 'vuoristokiipeilijä', 'vatsarutistus'];
+  const bodyweightKeywords = ['leuanveto', 'dippi', 'dippaus', 'roikku', 'polvennosto', 'polvien nosto', 'lankku', 'lankutus', 'lintukoira', 'hyönteinen', 'vuoristokiipeilijä', 'vatsarutistus',
+    // v3.2: liikkuvuus- ja huoltoliikkeet — ei painoa
+    'lapaluiden veto', 'venytys', 'lumienkeli', 'mobilisointi', 'pyöritykset'];
   if (bodyweightKeywords.some(k => name.includes(k))) {
     return 'kehon-paino';
   }
@@ -365,6 +508,8 @@ function suggestNextWeight(exerciseId, lastEx, baseWeight, exerciseName) {
   if (w === 0) return 0;
   // Aikaperustaiset core-liikkeet (lankku ym.): ei automaattista painonlisäystä
   if (isTimeBased(exerciseId, exerciseName)) return w;
+  // Liikkuvuus- ja aktivointiliikkeet: tavoite on laatu, ei kuorma
+  if (isMobility(exerciseName)) return w;
   if (exerciseId === 'bench') return w + 2.5;
   return w + 2.5;
 }
@@ -393,24 +538,26 @@ function formatSets(sets, exOrId) {
   const ex = (typeof exOrId === 'object' && exOrId !== null) ? exOrId : { id: exOrId, name: '' };
   const timeBased = isTimeBased(ex.id, ex.name);
   const mode = getWeightMode(ex);
+  // v3.2: yksipuolisissa liikkeissä luku tarkoittaa yhtä puolta
+  const sideSuffix = getRepMode(ex) === 'per-puoli' ? '/puoli' : '';
 
   return sets.map(s => {
     let str;
     const w = s.weight || 0;
     if (timeBased) {
       // Aikaperustainen: näytä sekunnit (reps-kenttä sisältää sekunnit)
-      str = (s.reps || 0) + 's';
+      str = (s.reps || 0) + 's' + sideSuffix;
       if (w > 0) str += ' +' + w + 'kg'; // painotettu lankku
     } else if (mode === 'kehon-paino') {
       // Kehon paino: tyhjä/0 = "kehon paino", muuten "kehon paino +Xkg"
       if (w > 0) {
-        str = 'kehon paino +' + w + 'kg × ' + (s.reps || 0);
+        str = 'kehon paino +' + w + 'kg × ' + (s.reps || 0) + sideSuffix;
       } else {
-        str = 'kehon paino × ' + (s.reps || 0);
+        str = 'kehon paino × ' + (s.reps || 0) + sideSuffix;
       }
     } else {
       // Normaali paino×toistot
-      str = w + '×' + (s.reps || 0);
+      str = w + '×' + (s.reps || 0) + sideSuffix;
       if (mode === 'per-kasi') str += ' (/käsi)';
     }
     if (s.rpe) str += ' (RPE' + s.rpe + ')';
@@ -561,9 +708,26 @@ function renderDailyCoachMessage(nextWorkout, sessions) {
 // ============================================================
 // TREENIKIRJAUS MODAL
 // ============================================================
-// Pitää kirjaa siitä mikä liike on näkyvissä
-let currentLogStep = 0;
+// Pitää kirjaa siitä mikä liike on näkyvissä.
+// v3.2: liikkeet voi tehdä vapaassa järjestyksessä, joten näyttöjärjestys
+// (logOrder) on erillään ohjelman järjestyksestä (DOM-indeksit).
+let currentLogStep = 0;   // sijainti logOrder-taulukossa (ei DOM-indeksi)
 let totalLogSteps = 0;
+let logOrder = [];        // DOM-indeksit näyttöjärjestyksessä
+let deferredSteps = new Set();  // DOM-indeksit jotka on merkitty "teen myöhemmin"
+let visitedSteps = new Set();   // DOM-indeksit joissa on jo käyty
+
+// Apurit: DOM-askeleen ja liikkeen id:n välillä
+function getLogStepEls() {
+  return document.querySelectorAll('.log-step');
+}
+function stepIdAt(domIndex) {
+  const steps = getLogStepEls();
+  return steps[domIndex] ? steps[domIndex].dataset.exId : null;
+}
+function currentDomIndex() {
+  return logOrder[currentLogStep];
+}
 
 function openLogModal() {
   // Tarkista onko keskeneräinen treeni tallessa
@@ -607,6 +771,12 @@ function openLogModalWithData(draftData) {
 
   currentLogStep = 0;
   totalLogSteps = plan.exercises.length;
+  logOrder = plan.exercises.map((_, i) => i);
+  deferredSteps = new Set();
+  visitedSteps = new Set();
+
+  // RPE-vinkki näytetään ensimmäisen varsinaisen voimaliikkeen kohdalla
+  const mainIdx = Math.max(0, plan.exercises.findIndex(e => !isMobility(e.name)));
 
   resetRestTimerUI(); // varmista että ajastin on idle-tilassa
 
@@ -655,16 +825,14 @@ function openLogModalWithData(draftData) {
     }
 
     div.innerHTML = `
-      <div class="log-step-header">
-        <span class="log-step-counter">Liike ${exIndex + 1}/${totalLogSteps}</span>
-      </div>
       <div class="log-ex-name">${ex.name}</div>
       <div class="log-ex-target">Tavoite: ${ex.reps}${(ex.weight > 0 && !isTimeBased(ex.id, ex.name)) ? ' @ ' + suggestedWeight + ' kg (raskain sarja)' : ''}</div>
+      ${isMobility(ex.name) ? '<div class="log-care-note">Huolto-/aktivointiliike — tavoite on liikkeen laatu, ei paino. Ei progressiota.</div>' : ''}
       ${lastTimeHtml}
-      ${exIndex === 0 ? '<div class="rpe-hint">RPE = kuinka raskas sarja oli (1–10). 10 = maksimi, 8 = 2 toistoa jäi varaan. Vapaaehtoinen.</div>' : ''}
+      ${exIndex === mainIdx ? '<div class="rpe-hint">RPE = kuinka raskas sarja oli (1–10). 10 = maksimi, 8 = 2 toistoa jäi varaan. Vapaaehtoinen.</div>' : ''}
       <div class="sets-header">
         <span class="sets-col-label">Sarja</span>
-        <span class="sets-col-label">${isTimeBased(ex.id, ex.name) ? 'Sekunnit' : 'Toistot'}</span>
+        <span class="sets-col-label">${getRepColumnLabel(ex)}</span>
         <span class="sets-col-label">Paino (kg)<span class="col-hint">${isTimeBased(ex.id, ex.name) ? 'tyhjä = ei lisäpainoa' : getWeightModeHint(ex)}</span></span>
         <span class="sets-col-label">RPE</span>
       </div>
@@ -701,28 +869,111 @@ function openLogModalWithData(draftData) {
     }
   });
 
-  // Jos jatketaan keskeneräistä, siirry siihen liikkeeseen mihin jäätiin
-  if (draftData && typeof draftData.lastStep === 'number') {
-    const step = Math.min(draftData.lastStep, totalLogSteps - 1);
-    showLogStep(step);
-  } else {
-    updateLogNav();
+  // Jos jatketaan keskeneräistä: palauta myös oma liikejärjestys ja sijainti
+  const idToIdx = {};
+  plan.exercises.forEach((e, i) => { idToIdx[e.id] = i; });
+
+  if (draftData && Array.isArray(draftData.order)) {
+    const restored = [];
+    draftData.order.forEach(id => {
+      const idx = idToIdx[id];
+      if (idx !== undefined && !restored.includes(idx)) restored.push(idx);
+    });
+    plan.exercises.forEach((_, i) => { if (!restored.includes(i)) restored.push(i); });
+    if (restored.length === plan.exercises.length) logOrder = restored;
   }
+  if (draftData && Array.isArray(draftData.deferred)) {
+    draftData.deferred.forEach(id => {
+      if (idToIdx[id] !== undefined) deferredSteps.add(idToIdx[id]);
+    });
+  }
+  if (draftData && Array.isArray(draftData.visited)) {
+    draftData.visited.forEach(id => {
+      if (idToIdx[id] !== undefined) visitedSteps.add(idToIdx[id]);
+    });
+  }
+
+  let startPos = 0;
+  if (draftData && draftData.lastStepId && idToIdx[draftData.lastStepId] !== undefined) {
+    const p = logOrder.indexOf(idToIdx[draftData.lastStepId]);
+    if (p >= 0) startPos = p;
+  } else if (draftData && typeof draftData.lastStep === 'number') {
+    startPos = Math.min(Math.max(draftData.lastStep, 0), totalLogSteps - 1);
+  }
+  showLogStep(startPos);
+
   document.getElementById('log-modal').style.display = 'flex';
 }
 
-// Näytä tietty askel (liike)
-function showLogStep(stepIndex) {
-  const steps = document.querySelectorAll('.log-step');
-  if (stepIndex < 0 || stepIndex >= steps.length) return;
+// Näytä tietty sijainti näyttöjärjestyksessä (ei DOM-indeksi)
+function showLogStep(pos) {
+  const steps = getLogStepEls();
+  if (!logOrder.length || pos < 0 || pos >= logOrder.length) return;
+  const domIdx = logOrder[pos];
   steps.forEach((s, i) => {
-    s.style.display = (i === stepIndex) ? 'block' : 'none';
+    s.style.display = (i === domIdx) ? 'block' : 'none';
   });
-  currentLogStep = stepIndex;
+  currentLogStep = pos;
+  visitedSteps.add(domIdx);
   updateLogNav();
   // Vieritä modaali ylös uuden liikkeen alkuun
   const modal = document.querySelector('#log-modal .modal');
   if (modal) modal.scrollTop = 0;
+}
+
+// Siirrä nykyinen liike jonon loppuun ("laite varattu" -tilanne)
+function deferCurrentExercise() {
+  if (logOrder.length < 2) return;
+  if (currentLogStep >= logOrder.length - 1) {
+    alert('Tämä on jo viimeinen liike — ei ole mitään mihin siirtää.');
+    return;
+  }
+  const domIdx = logOrder[currentLogStep];
+  logOrder.splice(currentLogStep, 1);
+  logOrder.push(domIdx);
+  deferredSteps.add(domIdx);
+  saveDraft();
+  // Sijainti pysyy samana → näkyviin tulee seuraava liike
+  showLogStep(currentLogStep);
+}
+
+// Hyppyvalikko: siirry mihin tahansa liikkeeseen
+function openJumpModal() {
+  const body = document.getElementById('jump-body');
+  if (!body) return;
+  body.innerHTML = '';
+  const steps = getLogStepEls();
+
+  logOrder.forEach((domIdx, pos) => {
+    const step = steps[domIdx];
+    if (!step) return;
+    const name = step.dataset.exName || '';
+    const isCurrent = pos === currentLogStep;
+
+    let status = '';
+    if (isCurrent) {
+      status = '<span class="jump-status jump-now">Nyt</span>';
+    } else if (deferredSteps.has(domIdx)) {
+      status = '<span class="jump-status jump-later">Siirretty</span>';
+    } else if (visitedSteps.has(domIdx)) {
+      status = '<span class="jump-status jump-done">✓ Käyty</span>';
+    }
+
+    const btn = document.createElement('button');
+    btn.className = 'jump-item' + (isCurrent ? ' jump-item-current' : '');
+    btn.innerHTML =
+      `<span class="jump-num">${pos + 1}</span>` +
+      `<span class="jump-name">${escapeHtml(name)}</span>` + status;
+    btn.onclick = () => { closeJumpModal(); saveDraft(); showLogStep(pos); };
+    body.appendChild(btn);
+  });
+
+  document.getElementById('jump-modal').style.display = 'flex';
+}
+
+function closeJumpModal() {
+  const m = document.getElementById('jump-modal');
+  if (m) m.style.display = 'none';
 }
 
 function nextLogStep() {
@@ -752,6 +1003,22 @@ function updateLogNav() {
   prevBtn.style.visibility = currentLogStep === 0 ? 'hidden' : 'visible';
 
   const isLast = currentLogStep === totalLogSteps - 1;
+
+  // Hyppynappi: "Liike 3/7 · Ojentajapunnerrus"
+  const jumpBtn = document.getElementById('log-jump-btn');
+  if (jumpBtn) {
+    const steps = getLogStepEls();
+    const cur = steps[logOrder[currentLogStep]];
+    const name = cur ? (cur.dataset.exName || '') : '';
+    jumpBtn.innerHTML =
+      `<span class="jump-btn-pos">Liike ${currentLogStep + 1}/${totalLogSteps}</span>` +
+      `<span class="jump-btn-name">${escapeHtml(name)}</span>` +
+      `<span class="jump-btn-caret">▾</span>`;
+  }
+
+  // "Teen myöhemmin" — ei mieltä viimeisessä liikkeessä
+  const deferBtn = document.getElementById('log-defer-btn');
+  if (deferBtn) deferBtn.style.display = isLast ? 'none' : 'flex';
   // Viimeisessä liikkeessä: näytä Tallenna, piilota Seuraava
   nextBtn.style.display = isLast ? 'none' : 'block';
   saveBtn.style.display = isLast ? 'block' : 'none';
@@ -806,6 +1073,7 @@ function removeSetRow(exId) {
 
 function closeLogModal() {
   stopRestTimer(); // varmista että ajastin ja Wake Lock sammuvat
+  closeJumpModal();
   document.getElementById('log-modal').style.display = 'none';
 }
 
@@ -968,6 +1236,7 @@ function collectLogData() {
       name: exName,
       sets: sets,
       weightMode: getWeightMode({ id: exId, name: exName }),
+      repMode: getRepMode({ id: exId, name: exName }),
       note: document.getElementById('note-' + exId)?.value || '',
     });
   });
@@ -977,14 +1246,23 @@ function collectLogData() {
     workout: nextWorkout,
     exercises: loggedExercises,
     timestamp: Date.now(),
-    lastStep: currentLogStep,
   };
+}
+
+// Kerää keskeneräisen treenin tila: sisältö + oma liikejärjestys ja sijainti
+function collectDraftData() {
+  const d = collectLogData();
+  d.order = logOrder.map(i => stepIdAt(i)).filter(Boolean);
+  d.deferred = [...deferredSteps].map(i => stepIdAt(i)).filter(Boolean);
+  d.visited = [...visitedSteps].map(i => stepIdAt(i)).filter(Boolean);
+  d.lastStepId = stepIdAt(currentDomIndex());
+  return d;
 }
 
 // Välitallennus keskeneräiselle treenille (erillään valmiista treeneistä)
 function saveDraft() {
   try {
-    const draft = collectLogData();
+    const draft = collectDraftData();
     localStorage.setItem('workoutDraft', JSON.stringify(draft));
     flashSavedHint();
   } catch (e) { /* ohita tallennusvirhe */ }
@@ -1013,7 +1291,6 @@ function clearDraft() {
 
 async function submitLog() {
   const session = collectLogData();
-  delete session.lastStep; // valmiiseen treeniin ei tarvita askelmerkintää
 
   const sessions = getSessions();
   sessions.push(session);
@@ -1450,6 +1727,9 @@ function hideLoading() {
 // KÄYNNISTYS
 // ============================================================
 document.addEventListener('DOMContentLoaded', () => {
+  // v3.2: lisää uudet terveysliikkeet myös aiemmin tallennettuun ohjelmaan
+  migratePlan();
+
   const savedKey = getApiKey();
   if (savedKey) {
     document.getElementById('api-key-input').value = savedKey;
