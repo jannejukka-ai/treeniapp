@@ -758,3 +758,126 @@ body {
 }
 .chat-send-btn:hover { background: var(--accent-light); }
 .chat-send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ============================================================
+   v3.2 — Joustava liikejärjestys, huoltoliikkeet
+   ============================================================ */
+
+/* Huolto-/aktivointiliikkeen merkki treenilistassa */
+.badge-care { background: rgba(168,85,247,0.15); color: #c084fc; }
+
+/* Huoltoliikkeen huomautus kirjausnäkymässä */
+.log-care-note {
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--text2);
+  background: rgba(168,85,247,0.10);
+  border-left: 3px solid rgba(168,85,247,0.55);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  margin-bottom: 0.75rem;
+}
+
+/* Rivi kirjausmodaalin yläosassa: hyppynappi + teen myöhemmin */
+.log-jump-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 1rem;
+}
+.log-jump-btn {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+.log-jump-btn:hover { border-color: var(--accent); }
+.jump-btn-pos {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.jump-btn-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text2);
+}
+.jump-btn-caret { color: var(--text2); flex-shrink: 0; }
+
+.log-defer-btn {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  background: transparent;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text2);
+  font-size: 12px;
+  font-family: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.log-defer-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* Siirry liikkeeseen -valikko */
+.jump-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  text-align: left;
+  padding: 11px 12px;
+  margin-bottom: 6px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: 14px;
+  font-family: inherit;
+  cursor: pointer;
+}
+.jump-item:hover { border-color: var(--accent); }
+.jump-item-current { border-color: var(--accent); background: rgba(59,130,246,0.12); }
+.jump-num {
+  width: 24px; height: 24px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--bg2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 600;
+  color: var(--text2);
+}
+.jump-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.jump-status {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 20px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.jump-now { background: rgba(59,130,246,0.18); color: var(--accent); }
+.jump-done { background: rgba(34,197,94,0.15); color: var(--success); }
+.jump-later { background: var(--bg2); color: var(--text2); }
