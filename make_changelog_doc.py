@@ -1,108 +1,134 @@
 #!/usr/bin/env python3
 """
-make_changelog_doc.py
-Lukee CHANGELOG.md:n ja tekee siitä muotoillun Word-dokumentin
-(Treeniapp-Versiohistoria.docx).
-
-Muotoilu:
-- Sininen versio-otsikko (## v3.1 ...)
-- Tummat alaotsikot (### ...)
-- Bulletit (- ...)
-- Normaali leipäteksti muille riveille
+make_changelog_doc.py — tekee CHANGELOG.md:stä muotoillun Word-dokumentin.
 
 Käyttö:
     python3 make_changelog_doc.py
-    python3 make_changelog_doc.py CHANGELOG.md Treeniapp-Versiohistoria.docx
+
+Lukee samasta kansiosta CHANGELOG.md ja kirjoittaa Treeniapp-Versiohistoria.docx.
+
+Muotoilu:
+    ## v3.2 — ...   -> sininen versio-otsikko
+    ### Alaotsikko   -> tumma alaotsikko
+    **Lihavoitu:**   -> tumma väliotsikko (rivi joka on kokonaan lihavoitu)
+    - kohta          -> bulletti (myös sisennetyt)
+    1. kohta         -> numeroitu kohta
+    muu teksti       -> leipäteksti
+    **lihava** tekstin seassa säilyy lihavana.
 """
 
-import sys
 import re
+import sys
+from pathlib import Path
+
 from docx import Document
-from docx.shared import Pt, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.shared import Pt, RGBColor
 
-BLUE = RGBColor(0x1E, 0x66, 0xE0)   # versio-otsikon sininen
-DARK = RGBColor(0x1F, 0x2A, 0x37)   # alaotsikon tumma
+HERE = Path(__file__).resolve().parent
+SOURCE = HERE / "CHANGELOG.md"
+OUTPUT = HERE / "Treeniapp-Versiohistoria.docx"
 
-def add_version_heading(doc, text):
-    p = doc.add_paragraph()
-    p.space_before = Pt(14)
-    run = p.add_run(text)
-    run.bold = True
-    run.font.size = Pt(18)
-    run.font.color.rgb = BLUE
-    return p
+BLUE = RGBColor(0x1D, 0x4E, 0xD8)   # versio-otsikko
+DARK = RGBColor(0x1E, 0x29, 0x3B)   # alaotsikot
+GREY = RGBColor(0x64, 0x74, 0x8B)   # aputeksti
 
-def add_sub_heading(doc, text):
-    p = doc.add_paragraph()
-    run = p.add_run(text)
-    run.bold = True
-    run.font.size = Pt(13)
-    run.font.color.rgb = DARK
-    return p
 
-def add_bullet(doc, text):
-    p = doc.add_paragraph(style='List Bullet')
-    _add_inline(p, text)
-    return p
+def add_rich_text(paragraph, text, base_bold=False, color=None, size=None):
+    """Lisää tekstin kappaleeseen niin että **lihavointi** säilyy."""
+    for i, part in enumerate(re.split(r"\*\*(.+?)\*\*", text)):
+        if not part:
+            continue
+        run = paragraph.add_run(part.replace("`", ""))
+        run.bold = base_bold or (i % 2 == 1)
+        if color is not None:
+            run.font.color.rgb = color
+        if size is not None:
+            run.font.size = Pt(size)
 
-def add_body(doc, text):
-    p = doc.add_paragraph()
-    _add_inline(p, text)
-    return p
 
-def _add_inline(paragraph, text):
-    """Tukee **lihavointia** tekstissä."""
-    parts = re.split(r'(\*\*.+?\*\*)', text)
-    for part in parts:
-        if part.startswith('**') and part.endswith('**'):
-            run = paragraph.add_run(part[2:-2])
-            run.bold = True
-        else:
-            paragraph.add_run(part)
+def build(source: Path, output: Path) -> Path:
+    if not source.exists():
+        sys.exit(f"Ei löydy: {source}")
 
-def main():
-    src = sys.argv[1] if len(sys.argv) > 1 else 'CHANGELOG.md'
-    out = sys.argv[2] if len(sys.argv) > 2 else 'Treeniapp-Versiohistoria.docx'
-
-    with open(src, encoding='utf-8') as f:
-        lines = f.read().splitlines()
-
+    lines = source.read_text(encoding="utf-8").splitlines()
     doc = Document()
 
-    # Dokumentin pääotsikko
+    style = doc.styles["Normal"]
+    style.font.name = "Calibri"
+    style.font.size = Pt(10.5)
+
     title = doc.add_paragraph()
-    trun = title.add_run('Treeniapp — Versiohistoria')
-    trun.bold = True
-    trun.font.size = Pt(24)
-    trun.font.color.rgb = BLUE
+    title.alignment = WD_ALIGN_PARAGRAPH.LEFT
+    add_rich_text(title, "Treeniapp — Versiohistoria", base_bold=True, color=BLUE, size=22)
+
+    sub = doc.add_paragraph()
+    add_rich_text(sub, "Automaattisesti koottu CHANGELOG.md-tiedostosta.", color=GREY, size=9)
+
+    skip_intro = True
 
     for raw in lines:
         line = raw.rstrip()
+        stripped = line.strip()
 
-        # ohita tiedoston oma pääotsikko ja erottimet
-        if line.startswith('# '):
-            continue
-        if line.strip() in ('', '---'):
-            if line.strip() == '':
-                continue
+        # Ohita tiedoston oma otsikko ja johdanto ensimmäiseen versioon asti
+        if skip_intro:
+            if stripped.startswith("## "):
+                skip_intro = False
             else:
                 continue
 
-        if line.startswith('## '):
-            add_version_heading(doc, line[3:].strip())
-        elif line.startswith('### '):
-            add_sub_heading(doc, line[4:].strip())
-        elif line.startswith('- '):
-            add_bullet(doc, line[2:].strip())
-        elif line.startswith('  - '):
-            p = add_bullet(doc, line[4:].strip())
-            p.paragraph_format.left_indent = Pt(36)
-        else:
-            add_body(doc, line.strip())
+        if not stripped or stripped == "---":
+            continue
 
-    doc.save(out)
-    print(f'Valmis: {out}')
+        # Versio-otsikko
+        if stripped.startswith("## "):
+            doc.add_paragraph()
+            p = doc.add_paragraph()
+            add_rich_text(p, stripped[3:], base_bold=True, color=BLUE, size=16)
+            continue
 
-if __name__ == '__main__':
-    main()
+        # Alaotsikko
+        if stripped.startswith("### "):
+            p = doc.add_paragraph()
+            p.paragraph_format.space_before = Pt(8)
+            add_rich_text(p, stripped[4:], base_bold=True, color=DARK, size=12)
+            continue
+
+        # Kokonaan lihavoitu rivi = väliotsikko
+        if re.fullmatch(r"\*\*.+\*\*:?", stripped):
+            p = doc.add_paragraph()
+            p.paragraph_format.space_before = Pt(6)
+            add_rich_text(p, stripped, color=DARK, size=11)
+            continue
+
+        # Bullet (myös sisennetty)
+        m = re.match(r"^(\s*)[-*]\s+(.*)$", line)
+        if m:
+            indent, text = m.group(1), m.group(2)
+            style_name = "List Bullet 2" if len(indent) >= 2 else "List Bullet"
+            try:
+                p = doc.add_paragraph(style=style_name)
+            except KeyError:
+                p = doc.add_paragraph(style="List Bullet")
+            add_rich_text(p, text)
+            continue
+
+        # Numeroitu kohta
+        m = re.match(r"^\s*\d+\.\s+(.*)$", line)
+        if m:
+            p = doc.add_paragraph(style="List Number")
+            add_rich_text(p, m.group(1))
+            continue
+
+        # Leipäteksti
+        p = doc.add_paragraph()
+        add_rich_text(p, stripped)
+
+    doc.save(output)
+    return output
+
+
+if __name__ == "__main__":
+    path = build(SOURCE, OUTPUT)
+    print(f"Valmis: {path}")
