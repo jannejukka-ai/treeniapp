@@ -3,7 +3,7 @@
 Tähän tiedostoon on kirjattu tulevia ominaisuuksia ja kehityskohteita joita ei ole vielä toteutettu.
 Kun jokin kohta rakennetaan, se siirretään CHANGELOG-tiedostoon valmiina versiona.
 
-**MUISTA jokaisessa versiopäivityksessä:** päivitä versionumero myös index.html:n footeriin (teksti "Treeniapp v3.1"). Se ei päivity automaattisesti.
+**MUISTA jokaisessa versiopäivityksessä:** päivitä versionumero myös index.html:n footeriin (teksti "Treeniapp v3.2"). Se ei päivity automaattisesti.
 
 **⚠️ PYSYVÄ SÄÄNTÖ — AI-VALMENTAJAN SYNKRONOINTI:** Aina kun muutetaan liikkeitä, treenijakoa, tavoitteita, rajoitteita tai kirjauslogiikkaa, TARKISTA JA PÄIVITÄ SAMASSA YHTEYDESSÄ myös AI-valmentajan tiedot (PROFILE-teksti app2.js:ssä, ja tarvittaessa buildCoachContext / analyzeSession-promptit). Syy: jos valmentajan tiedot jäävät jälkeen, JJ:llä on puutteellisin tiedoin varustettu valmentaja joka voi antaa ohjelman vastaisia tai jopa terveydelle haitallisia neuvoja. Valmentaja ja sovelluksen todellisuus EIVÄT saa erkaantua. Tämä koskee erityisesti: uudet/poistetut liikkeet, muuttuneet rajoitteet, uudet aikaperustaiset tai kehon paino -liikkeet, tavoitemuutokset.
 
@@ -30,34 +30,43 @@ Katso tarkemmat tiedot CHANGELOG:sta v3.1.
 
 ---
 
+**⚠️ PYSYVÄ SÄÄNTÖ — OHJELMAMUUTOSTEN MIGRAATIO (opittu v3.2:ssa):** Käyttäjän treenijako on tallennettu selaimen localStorageen. Jos muutat pelkkää DEFAULT_PLANia, muutos EI näy käyttäjälle lainkaan — hän näkee yhä vanhan tallennetun ohjelmansa. Aina kun oletusohjelmaan lisätään tai nimetään uudelleen liikkeitä, päivitä `migratePlan`-funktio app2.js:ssä JA nosta `PLAN_MIGRATION_VERSION`-lukua. Migraatio saa olla vain lisäävä/korjaava, ei koskaan poistava, jottei käyttäjän omia muokkauksia menetetä.
+
+---
+
+## VALMIS ✅ — v3.2: TOS/ryhtiliikkeet vakio-ohjelmaan + käytettävyys (toteutettu 22.9.2026)
+
+Toteutettu koko v3.2-jono, kohdat **A, B, C ja D**. Tiivistetysti:
+
+- ✅ **A) TOS/ryhti-liikkeet vakio-ohjelmaan.** Treeni A: Lapaluiden veto yhteen istuen (alkuun, 2×10) + Rintalihaksen venytys oviaukossa (loppuun, 2×30 s/puoli). Treeni B: Lapaluiden veto yhteen istuen (alkuun) + Lumienkeli foam rollilla (loppuun, 2×10). Liikkeitä per treeni 5 → 7, aikalisä ~3–4 min. Uusi kirjastokategoria "Liikkuvuus & TOS (fysioterapia)" (7 liikettä: 5 MedBridge-liikettä + face pull + reverse fly), Pallof-punnerrus lisätty coreen. AI-valmentajan PROFILE päivitetty kaikilla kolmella vaaditulla asialla (ei progressiota, rakenne-logiikka, suojattu status).
+- ✅ **B) Toistojen per-puoli-erittely.** getRepMode + "per puoli" -vihje kirjauksessa + "/puoli" historiassa. Tunnistus automaattinen liikkeen nimestä; ex.repMode-ylikirjoitus mahdollinen koodissa.
+- ✅ **C) Joustava liikejärjestys.** Hyppynappi "Liike 3/7 · liikkeen nimi ▾" avaa listan (tilat: Nyt / ✓ Käyty / Siirretty) + "Teen myöhemmin ↓" siirtää liikkeen jonon loppuun. Järjestys säilyy välitallennuksen yli.
+- ✅ **D) Ylätalja eriytetty leuanvedosta.** Perusohjelmassa nyt pelkkä "Ylätalja" (painomerkintä "yhteensä"). Leuanveto edelleen erikseen kirjastossa. Nimi korjataan myös vanhaan tallennettuun ohjelmaan.
+- ✅ **Uutta:** kertaluontoinen ohjelman migraatio (migratePlan) — uudet liikkeet ilmestyvät automaattisesti myös vanhaan tallennettuun treenijakoon.
+
+120 automaattista yksikkötestiä läpi. Katso tarkemmat tiedot CHANGELOG:sta v3.2.
+
+**⬜ JJ:n oma tehtävä (ei koodia):** vahvista fysioterapeutilta/lääkäriltä, että juuri nämä TOS-liikkeet sopivat sinulle. MedBridge-ohje on yleinen, ei henkilökohtainen määräys.
+
+---
+
 ## PIPELINE — seuraavat kehityskohteet (käyttäjän priorisoima järjestys)
 
 ---
 
-### 🎯 SEURAAVA VERSIO (v3.2) — sovittu kehitysjono (18.9.2026, JJ + Claude)
+### 🎯 SEURAAVA VERSIO (v3.3) — ehdokkaat (päivitetty 22.9.2026)
 
-Tämä lista koottiin v3.1:n jälkeen. Ehdotettu järjestys: kevyet ja terveysrelevantit ensin.
+v3.2:n kohdat A–D on tehty. Jäljellä olevat, priorisoitu järjestys:
 
-**== MITÄ KUULUU v3.2:een (vahvistettu JJ:n kanssa) ==**
-
-A. **TOS/ryhti-liikkeet VAKIO-OHJELMAAN** (aktivointi alkuun + huolto loppuun, molempiin treeneihin) + uusi kirjastokategoria "Liikkuvuus & TOS". TÄMÄ ON v3.2:N YDIN. Täydet tiedot alempana kohdassa "SOVITTU v3.2:een — TOS/ryhti-liikkeiden lisäys". Sisältää myös AI-valmentajan PROFILE-päivityksen.
-
-B. **Toistojen per-puoli-erittely** (JJ:n toive). Sivulankku, lintukoira, dead bug ym. yksipuoliset: mahdollisuus merkitä toistot "per puoli" (repMode = 'per-puoli'). Paino-puoli hoidettu jo v3.1:ssä, tämä on toistojen vastaava lisä. Rajattu, selkeä.
-
-C. **Joustava liikejärjestys (laite varattu -tilanne)** — NOSTETTU v3.2:een JJ:n toiveesta 18.9. Ongelma: jos salilla ei voi tehdä liikkeitä ohjelman järjestyksessä (laite varattu, haluaa tehdä toisen odotellessa), sovellus ei jousta. Ratkaisu: mahdollisuus hypätä liikkeisiin vapaassa järjestyksessä TAI merkitä liike "teen myöhemmin". Keskisuuri työ (koskettaa kirjauksen ydintä). (Sama kuin vanha kohta 0.5b alempana.)
-
-D. **Yhdistelmäliike "Ylätalja / Leuanveto" ERIYTETTÄVÄ kahdeksi** — JJ:n havainto salilla 18.9. BUGI: liikkeen nimi sisältää sanan "leuanveto", joten getWeightMode tulkitsee sen kehon paino -liikkeeksi. MUTTA ylätalja on kg-kuormaliike (pitäisi olla "yhteensä") ja leuanveto kehon paino. Sama painomerkintä ei sovi molempiin → näyttää väärin jos tekee ylätaljaa esim. 70 kg. RATKAISU: eriytä kahdeksi erilliseksi liikkeeksi kirjastoon (Ylätalja = yhteensä; Leuanveto = kehon paino, on jo kirjastossa). PERUSOHJELMAAN jätetään TÄLLÄ HAAVAA Ylätalja (id 'lat', nimi vaihdetaan pelkäksi "Ylätalja"). Pieni, selkeä korjaus.
-
-**== EI v3.2:een — MYÖHEMPIIN VERSIOIHIN (v3.3+) ==**
-
-- **Historia-seuranta muillekin liikkeille kuin penkki** (Clauden bongaus). Nyt Historia-sivun kehityskaavio on kovakoodattu vain id:hen 'bench'. Laajennus: valittava mitä liikettä seuraa (esim. Arnold press, tuettu soutu). Tukee terveys-ensin-tavoitetta. Keskisuuri. → v3.3-ehdokas.
-- **Paino-merkinnän käsivalinta käyttöliittymään** (JJ:n kysymys + Clauden vastaus). Tehdään VAIN jos automatiikka osoittautuu riittämättömäksi. Toteutustapa selvitetty: valinta LIIKKEENVAIHTO-IKKUNAAN (ei kirjausriviin). Kertaluontoinen valinta per liike: [per käsi] [yhteensä] [kehon paino] → ex.weightMode. Koodissa jo valmis pohja (getWeightMode lukee ex.weightMode). Matala prioriteetti.
-- **Progressioehdotus fiksummaksi per liiketyyppi** (Clauden bongaus). EI kiireellinen: JJ:n salin käsipainot nousevat 2,5 kg välein, joten +2,5 kg on jo oikea askel. Kentät hyväksyvät minkä tahansa vapaan arvon, joten epätarkkuudesta ei käytännön haittaa. Nice-to-have.
-- **Pikakysymykset päivitettävä uuteen tavoitteeseen** (kosmeettinen). Valmentaja-välilehden pikakysymykset ovat yhä vanhoja ("Penkki ei nouse" jne.). Terveys on nyt ykköstavoite. Voi tehdä minkä tahansa version yhteydessä. Matala.
-- **Penkkiohjeen nyanssit valmentajan profiiliin** (ks. PDF-analyysi, PIENI TARKENNUS 3 alempana). Nice-to-have, nykyohje riittää turvallisuuteen.
+1. **Historia-seuranta muillekin liikkeille kuin penkki.** Historia-sivun kehityskaavio on yhä kovakoodattu id:hen 'bench'. Laajennus: valittava mitä liikettä seuraa (esim. Arnold press, tuettu taljasoutu). Tukee terveys-ensin-tavoitetta. Keskisuuri. **Vahvin v3.3-ehdokas.**
+2. **Kirjatun painon/sarjan korjaus jälkikäteen** (vanha kohta 0.5a). HUOM: v3.2:n hyppyvalikko helpotti tätä jo paljon — nyt mihin tahansa liikkeeseen pääsee palaamaan kesken treenin. Jäljellä oleva tarve: yhteenvetonäkymä ennen tallennusta. Arvioi uudelleen käytön jälkeen, tarvitaanko enää.
+3. **Pikakysymykset päivitettävä uuteen tavoitteeseen** (kosmeettinen). Valmentaja-välilehden pikakysymykset ovat yhä vanhoja ("Penkki ei nouse" jne.), vaikka terveys on nyt ykköstavoite. Voisi lisätä esim. "Käsi puutuu — mitä teen?" ja "Onko huoltoliikkeeni riittävät?". Pieni.
+4. **Penkkiohjeen nyanssit valmentajan profiiliin** (ks. PIENI TARKENNUS 3 alempana). Nice-to-have, nykyohje riittää turvallisuuteen. Matala.
+5. **Paino-merkinnän käsivalinta käyttöliittymään.** Tehdään VAIN jos automatiikka osoittautuu riittämättömäksi. Toteutustapa selvitetty: valinta liikkeenvaihto-ikkunaan, ex.weightMode. Sama pätee nyt myös ex.repMode-kenttään (v3.2). Matala.
+6. **Progressioehdotus fiksummaksi per liiketyyppi.** EI kiireellinen: +2,5 kg on oikea askel JJ:n salin käsipainoille. Nice-to-have.
 
 **== ISO, OMA PROJEKTINSA (ei lähiversioihin) ==**
-- Pitkän aikavälin muisti + periodisaatio = alla oleva kohta 1. Kytkeytyy historia-seurantaan (v3.3-ehdokas yllä).
+- Pitkän aikavälin muisti + periodisaatio = alla oleva kohta 1. Kytkeytyy historia-seurantaan (kohta 1 yllä).
 
 ---
 
@@ -65,7 +74,7 @@ D. **Yhdistelmäliike "Ylätalja / Leuanveto" ERIYTETTÄVÄ kahdeksi** — JJ:n 
 
 JJ pyysi käymään projektin ladatut PDF:t läpi ja vertaamaan sovelluksen nykytilaan. Löytyi kaksi merkittävää aukkoa liikekirjastossa. Nämä ovat SISÄLTÖ-lisäyksiä (uusia liikkeitä), eivät koodimuutoksia — helppo toteuttaa lisäämällä EXERCISE_LIBRARY-listaan app2.js:ssä.
 
-**AUKKO 1 (tärkein) — MedBridge TOS-liikkeet puuttuvat kokonaan.**
+**AUKKO 1 ✅ TEHTY v3.2:ssa — MedBridge TOS-liikkeet puuttuivat kokonaan.**
 MedBridge-PDF on lääketieteellinen fysioterapiaohje juuri JJ:n TOS-vaivaan. Sisältää 5 liikettä, joista MIKÄÄN ei ole kirjastossa. Nämä ovat liikkuvuus-/mobilisointiliikkeitä (ei voimaliikkeitä) — vastaavat suoraan TODO:n fokusta (rintarangan liikkuvuus, lapatuki, rintakehän avaus). Suositus: lisää uusi kategoria "Liikkuvuus & TOS (fysioterapia)" kirjastoon:
    - Rintalihaksen venytys oviaukossa (120° abduktio) — Single Arm Doorway Pec Stretch
    - Lapaluiden veto yhteen istuen (Seated Scapular Retraction) — HUOM: tämä on suoraan penkin "lapatuki"-tekniikan harjoitusliike
@@ -74,7 +83,7 @@ MedBridge-PDF on lääketieteellinen fysioterapiaohje juuri JJ:n TOS-vaivaan. Si
    - Rintakehän mobilisointi pallolla (Chest Mobilization with Small Ball)
    Nämä ovat aikaperustaisia/toistoperustaisia venytyksiä — ei painoa. Merkitään kehon paino / aika.
 
-**AUKKO 2 — Ryhtiä ja lapatukea tukevat vetoliikkeet puuttuvat.**
+**AUKKO 2 ✅ TEHTY v3.2:ssa — Ryhtiä ja lapatukea tukevat vetoliikkeet puuttuivat.**
 Projektin selkä/ryhti-ohjelma JA Tsemppi-penkkiopas korostavat molemmat näitä. Profiili mainitsee "1.5-2× vetävää työntävää kohden" ja lapatuen, mutta kirjastosta puuttuu:
    - Face pull / Takaolkapään veto kasvoille (taljassa) — KESKEINEN ryhdille & olkapään terveydelle, Tsemppi-opas suosittaa olkapään ennaltaehkäisyssä. Lisää kategoriaan Olkapäät tai Selkä.
    - Reverse fly / Käänteiset flyes (käsipainoilla tai taljassa) — takaolkapää & yläselkä, ryhti
@@ -92,7 +101,7 @@ Vertasin sovelluksen penkkiohjetta molempiin penkkioppaisiin (NHA/Nuckols + Tsem
 
 ---
 
-### ✅ SOVITTU v3.2:een — TOS/ryhti-liikkeiden lisäys VAKIO-OHJELMAAN (JJ + Claude 18.9.2026)
+### ✅ TEHTY v3.2:ssa — TOS/ryhti-liikkeiden lisäys VAKIO-OHJELMAAN (säilytetty referenssiksi)
 
 JJ päätti että olennaisimmat kuntouttavat liikkeet lisätään vakio-ohjelmaan (ei vain kirjastoon), koska kirjastoon jäävät liikkeet jäävät helposti tekemättä. EHDOTON reunaehto: treeni EI saa venyä paljoa — JJ inhoaa pitkiä salikäyntejä. Ratkaisu: lisätään vain lyhyitä liikkuvuus-/aktivointiliikkeitä (~1-2 min), ei raskaita voimaliikkeitä.
 
@@ -176,7 +185,7 @@ HUOM: Claude ei ole lääkäri/fysioterapeutti — lääkärien ohjeet menevät 
    - Koodissa on jo valmis pohja liikekohtaiselle ylikirjoitukselle: jos liike-objektille asettaa kentän `weightMode` ('per-kasi' | 'kehon-paino' | 'yhteensa'), se voittaa automatiikan. Tätä varten EI ole vielä UI:ta — se olisi pieni lisätyö jos joskus tarve (nappi/valikko liikkeenvaihto-ikkunaan).
    - Konkreettinen esimerkki korjauksesta: jos "Uusi kummallinen liike X" pitäisi olla per käsi mutta näkyy "yhteensä", lisää sen nimen tunnistava sana perHandKeywords-listaan getWeightMode-funktiossa.
 
-⬜ JÄI TEKEMÄTTÄ: toistojen per-puoli-erittely erikseen (esim. sivulankku/lintukoira "toistot per puoli"). Paino-puoli on hoidettu, mutta toistojen repMode ('per puoli') olisi vielä oma lisänsä jos halutaan täsmällisyyttä.
+✅ TEHTY v3.2:ssa: toistojen per-puoli-erittely (getRepMode). Alkuperäinen kuvaus: toistojen per-puoli-erittely erikseen (esim. sivulankku/lintukoira "toistot per puoli"). Paino-puoli on hoidettu, mutta toistojen repMode ('per puoli') olisi vielä oma lisänsä jos halutaan täsmällisyyttä.
 
 
 Käyttäjä nosti esiin tärkeän epäselvyyden: kun kirjaa esim. hauiskäännön alataljalla, tarkoittaako "Paino (kg)" koko painoa vai per puoli? Nykyään sovellus EI määrittele tätä lainkaan — jätetty käyttäjän tulkinnan varaan. Tämä haittaa tulosten vertailua kerrasta toiseen.
@@ -218,7 +227,7 @@ Kirjaston läpikäynti (34 liikettä) — nämä tarvitsevat tarkennuksen:
 - Mahdollinen ratkaisu: "Edellinen"-napilla palaaminen (osin jo mahdollista?), TAI yhteenvetonäkymä ennen tallennusta jossa voi korjata mitä tahansa liikettä/sarjaa.
 - Arvio: keskitaso
 
-*b) Joustava liikejärjestys (laite varattu -tilanne):* ⬆️ NOSTETTU v3.2:een (ks. yläosan v3.2-jono kohta C)
+*b) Joustava liikejärjestys (laite varattu -tilanne):* ✅ TEHTY v3.2:ssa (hyppyvalikko + Teen myöhemmin)
 - Ongelma: jos salilla ei voi tehdä liikkeitä ohjelman järjestyksessä (esim. laite varattu, haluaa tehdä toisen liikkeen odotellessa), sovellus ei jousta.
 - Mahdollinen ratkaisu: mahdollisuus hypätä liikkeisiin vapaassa järjestyksessä, tai merkitä liike "teen myöhemmin".
 - Arvio: keskitaso
