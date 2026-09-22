@@ -38,17 +38,26 @@ Katso tarkemmat tiedot CHANGELOG:sta v3.1.
 
 Tämä lista koottiin v3.1:n jälkeen. Ehdotettu järjestys: kevyet ja terveysrelevantit ensin.
 
-1. **Toistojen per-puoli-erittely** (JJ:n toive). Sivulankku, lintukoira, dead bug ym. yksipuoliset: mahdollisuus merkitä toistot "per puoli" (repMode = 'per-puoli'). Paino-puoli hoidettu jo v3.1:ssä, tämä on toistojen vastaava lisä. Rajattu, selkeä. **Prioriteetti: korkein — luontevin aloituskohta v3.2:lle.**
+**== MITÄ KUULUU v3.2:een (vahvistettu JJ:n kanssa) ==**
 
-2. **Progressioehdotus fiksummaksi per liiketyyppi** (Clauden bongaus). Nyt `suggestNextWeight` ehdottaa +2,5 kg kaikille. HUOM (JJ:n tarkennus 18.9.): JJ:n salin käsipainot nousevat 2,5 kg välein, joten +2,5 kg/käsi on itse asiassa jo OIKEA askel sekä tangolle että käsipainoille → tämä ei ole kiireellinen JJ:lle. Kentät hyväksyvät joka tapauksessa minkä tahansa vapaan arvon (16, 17.5 jne.), joten ehdotuksen epätarkkuudesta ei ole käytännön haittaa. Jää nice-to-have -tasolle. Prioriteetti: laskettu matalaksi.
+A. **TOS/ryhti-liikkeet VAKIO-OHJELMAAN** (aktivointi alkuun + huolto loppuun, molempiin treeneihin) + uusi kirjastokategoria "Liikkuvuus & TOS". TÄMÄ ON v3.2:N YDIN. Täydet tiedot alempana kohdassa "SOVITTU v3.2:een — TOS/ryhti-liikkeiden lisäys". Sisältää myös AI-valmentajan PROFILE-päivityksen.
 
-3. **Historia-seuranta muillekin liikkeille kuin penkki** (Clauden bongaus). Nyt Historia-sivun kehityskaavio on kovakoodattu vain id:hen 'bench'. Laajennus: valittava mitä liikettä seuraa (esim. Arnold press, tuettu soutu). Tukee uutta terveys-ensin-tavoitetta. Keskisuuri. Prioriteetti: keskitaso.
+B. **Toistojen per-puoli-erittely** (JJ:n toive). Sivulankku, lintukoira, dead bug ym. yksipuoliset: mahdollisuus merkitä toistot "per puoli" (repMode = 'per-puoli'). Paino-puoli hoidettu jo v3.1:ssä, tämä on toistojen vastaava lisä. Rajattu, selkeä.
 
-4. **Paino-merkinnän käsivalinta käyttöliittymään** (JJ:n kysymys + Clauden vastaus). Automatiikka riittää nyt; tämä tehdään VAIN jos automatiikka osoittautuu riittämättömäksi. Toteutustapa selvitetty: valinta tulee LIIKKEENVAIHTO-IKKUNAAN (ei kirjausriviin, joka on jo tiivis). Kertaluontoinen valinta per liike: [per käsi] [yhteensä] [kehon paino] → asettaa ex.weightMode. Ruututila EI ole ongelma (iPhone 17 Pro Max iso ruutu). Koodissa on jo valmis pohja (getWeightMode lukee ex.weightMode). Prioriteetti: matala.
+C. **Joustava liikejärjestys (laite varattu -tilanne)** — NOSTETTU v3.2:een JJ:n toiveesta 18.9. Ongelma: jos salilla ei voi tehdä liikkeitä ohjelman järjestyksessä (laite varattu, haluaa tehdä toisen odotellessa), sovellus ei jousta. Ratkaisu: mahdollisuus hypätä liikkeisiin vapaassa järjestyksessä TAI merkitä liike "teen myöhemmin". Keskisuuri työ (koskettaa kirjauksen ydintä). (Sama kuin vanha kohta 0.5b alempana.)
 
-5. **Pikakysymykset päivitettävä uuteen tavoitteeseen** (Clauden bongaus, kosmeettinen). Valmentaja-välilehden pikakysymykset ovat yhä vanhoja ("Penkki ei nouse" jne.). Terveys on nyt ykköstavoite → esim. yksi kysymys "Selkä/olkapää-ystävällinen vaihtoehto liikkeelle X". Voi tehdä minkä tahansa version yhteydessä. Prioriteetti: matala.
+D. **Yhdistelmäliike "Ylätalja / Leuanveto" ERIYTETTÄVÄ kahdeksi** — JJ:n havainto salilla 18.9. BUGI: liikkeen nimi sisältää sanan "leuanveto", joten getWeightMode tulkitsee sen kehon paino -liikkeeksi. MUTTA ylätalja on kg-kuormaliike (pitäisi olla "yhteensä") ja leuanveto kehon paino. Sama painomerkintä ei sovi molempiin → näyttää väärin jos tekee ylätaljaa esim. 70 kg. RATKAISU: eriytä kahdeksi erilliseksi liikkeeksi kirjastoon (Ylätalja = yhteensä; Leuanveto = kehon paino, on jo kirjastossa). PERUSOHJELMAAN jätetään TÄLLÄ HAAVAA Ylätalja (id 'lat', nimi vaihdetaan pelkäksi "Ylätalja"). Pieni, selkeä korjaus.
 
-*(Iso, oma projektinsa — ei vielä v3.2:een):* Pitkän aikavälin muisti + periodisaatio = alla oleva kohta 1. Kytkeytyy kohtaan 3 (historia-seuranta).
+**== EI v3.2:een — MYÖHEMPIIN VERSIOIHIN (v3.3+) ==**
+
+- **Historia-seuranta muillekin liikkeille kuin penkki** (Clauden bongaus). Nyt Historia-sivun kehityskaavio on kovakoodattu vain id:hen 'bench'. Laajennus: valittava mitä liikettä seuraa (esim. Arnold press, tuettu soutu). Tukee terveys-ensin-tavoitetta. Keskisuuri. → v3.3-ehdokas.
+- **Paino-merkinnän käsivalinta käyttöliittymään** (JJ:n kysymys + Clauden vastaus). Tehdään VAIN jos automatiikka osoittautuu riittämättömäksi. Toteutustapa selvitetty: valinta LIIKKEENVAIHTO-IKKUNAAN (ei kirjausriviin). Kertaluontoinen valinta per liike: [per käsi] [yhteensä] [kehon paino] → ex.weightMode. Koodissa jo valmis pohja (getWeightMode lukee ex.weightMode). Matala prioriteetti.
+- **Progressioehdotus fiksummaksi per liiketyyppi** (Clauden bongaus). EI kiireellinen: JJ:n salin käsipainot nousevat 2,5 kg välein, joten +2,5 kg on jo oikea askel. Kentät hyväksyvät minkä tahansa vapaan arvon, joten epätarkkuudesta ei käytännön haittaa. Nice-to-have.
+- **Pikakysymykset päivitettävä uuteen tavoitteeseen** (kosmeettinen). Valmentaja-välilehden pikakysymykset ovat yhä vanhoja ("Penkki ei nouse" jne.). Terveys on nyt ykköstavoite. Voi tehdä minkä tahansa version yhteydessä. Matala.
+- **Penkkiohjeen nyanssit valmentajan profiiliin** (ks. PDF-analyysi, PIENI TARKENNUS 3 alempana). Nice-to-have, nykyohje riittää turvallisuuteen.
+
+**== ISO, OMA PROJEKTINSA (ei lähiversioihin) ==**
+- Pitkän aikavälin muisti + periodisaatio = alla oleva kohta 1. Kytkeytyy historia-seurantaan (v3.3-ehdokas yllä).
 
 ---
 
@@ -209,7 +218,7 @@ Kirjaston läpikäynti (34 liikettä) — nämä tarvitsevat tarkennuksen:
 - Mahdollinen ratkaisu: "Edellinen"-napilla palaaminen (osin jo mahdollista?), TAI yhteenvetonäkymä ennen tallennusta jossa voi korjata mitä tahansa liikettä/sarjaa.
 - Arvio: keskitaso
 
-*b) Joustava liikejärjestys (laite varattu -tilanne):*
+*b) Joustava liikejärjestys (laite varattu -tilanne):* ⬆️ NOSTETTU v3.2:een (ks. yläosan v3.2-jono kohta C)
 - Ongelma: jos salilla ei voi tehdä liikkeitä ohjelman järjestyksessä (esim. laite varattu, haluaa tehdä toisen liikkeen odotellessa), sovellus ei jousta.
 - Mahdollinen ratkaisu: mahdollisuus hypätä liikkeisiin vapaassa järjestyksessä, tai merkitä liike "teen myöhemmin".
 - Arvio: keskitaso
