@@ -119,8 +119,9 @@
 
       <div class="card">
         <div class="card-label">Treenijako</div>
-        <p class="split-text"><strong>Treeni A — Yläkroppa (työntö) + Etujalat</strong><br>Penkkipunnerrus, ylätalja/leuanveto, Bulgarialainen split-kyykky, ojentajapunnerrus, lankku</p>
-        <p class="split-text" style="margin-top: 0.75rem;"><strong>Treeni B — Yläkroppa (veto) + Takajalat</strong><br>Lantionnosto, tuettu taljasoutu istuen, Arnold press istuen, vasarakääntö, sivulankku</p>
+        <p class="split-text"><strong>Treeni A — Yläkroppa (työntö) + Etujalat</strong><br>Lapaluiden veto (aktivointi), penkkipunnerrus, ylätalja, Bulgarialainen split-kyykky, ojentajapunnerrus, lankku, rintalihaksen venytys oviaukossa (huolto)</p>
+        <p class="split-text" style="margin-top: 0.75rem;"><strong>Treeni B — Yläkroppa (veto) + Takajalat</strong><br>Lapaluiden veto (aktivointi), lantionnosto, tuettu taljasoutu istuen, Arnold press istuen, vasarakääntö, sivulankku, lumienkeli foam rollilla (huolto)</p>
+        <p class="split-text" style="margin-top: 0.75rem; color: var(--text2); font-size: 13px;">Aktivointi alkuun herättää lapatuen ennen nostoja. Huoltoliike lopussa tehdään lämpimänä. Nämä ovat terveysliikkeitä — ne eivät ole progressiokohteita.</p>
       </div>
 
     </div>
@@ -185,7 +186,7 @@
     </div>
   </main>
 
-  <footer class="app-footer">Treeniapp v3.1</footer>
+  <footer class="app-footer">Treeniapp v3.2</footer>
 
 </div>
 
@@ -197,6 +198,10 @@
       <button class="icon-btn" onclick="closeLogModal()">✕</button>
     </div>
     <div class="log-progress-bar"><div class="log-progress-fill" id="log-progress-fill"></div></div>
+    <div class="log-jump-row">
+      <button class="log-jump-btn" id="log-jump-btn" onclick="openJumpModal()">Liike 1/1 ▾</button>
+      <button class="log-defer-btn" id="log-defer-btn" onclick="deferCurrentExercise()">Teen myöhemmin ↓</button>
+    </div>
     <div id="log-form"></div>
     <div class="rest-timer" id="rest-timer">
       <div class="rest-timer-idle" id="rest-timer-idle">
@@ -232,6 +237,21 @@
     <div id="swap-body"></div>
     <div class="modal-footer">
       <button class="btn-secondary" style="width:100%;" onclick="closeSwapModal()">Peruuta</button>
+    </div>
+  </div>
+</div>
+
+<!-- Siirry liikkeeseen Modal (vapaa liikejärjestys) -->
+<div class="modal-overlay" id="jump-modal" style="display:none;">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title">Siirry liikkeeseen</h3>
+      <button class="icon-btn" onclick="closeJumpModal()">✕</button>
+    </div>
+    <p class="settings-help">Voit tehdä liikkeet haluamassasi järjestyksessä. Kirjaukset säilyvät.</p>
+    <div id="jump-body"></div>
+    <div class="modal-footer">
+      <button class="btn-secondary" style="width:100%;" onclick="closeJumpModal()">Peruuta</button>
     </div>
   </div>
 </div>
