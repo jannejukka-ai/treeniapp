@@ -5,6 +5,72 @@ Uusin versio on aina ylimpänä.
 
 ---
 
+## v3.2 — 22.9.2026
+
+**TOS- ja ryhtiliikkeet vakio-ohjelmaan + kolme käytettävyysparannusta.** Toteutettu TODO:n v3.2-jono kokonaisuudessaan (kohdat A–D).
+
+### A) TOS- ja ryhtiliikkeet vakio-ohjelmaan (version ydin)
+
+Olennaisimmat kuntouttavat liikkeet siirrettiin kirjastosta vakio-ohjelmaan, koska pelkkään kirjastoon jäävät liikkeet jäävät helposti tekemättä. Liikkeet ovat lyhyitä — treeni pitenee vain noin 3–4 minuuttia.
+
+- **Treeni A:** alkuun Lapaluiden veto yhteen istuen (aktivointi, 2×10), loppuun Rintalihaksen venytys oviaukossa (huolto, 2×30 s/puoli)
+- **Treeni B:** alkuun Lapaluiden veto yhteen istuen (aktivointi, 2×10), loppuun Lumienkeli foam rollilla (huolto, 2×10)
+- Liikkeitä per treeni: 5 → 7
+
+**Fysiologinen perustelu sijoittelulle:** alkuun kuuluu aktivointi, ei venyttely. Kevyt lapatuki-aktivointi ennen penkkiä ja soutua tekee nostoista turvallisempia ja vahvempia. Pitkiä staattisia venytyksiä ei tehdä ennen voimaliikkeitä, koska ne voivat hetkellisesti heikentää voimantuottoa. Huoltovenytys kuuluu loppuun, jolloin keho on lämmin.
+
+**Uusi kirjastokategoria "Liikkuvuus & TOS (fysioterapia)"** — 7 liikettä:
+- Lapaluiden veto yhteen istuen, Hartioiden pyöritykset istuen, Rintalihaksen venytys oviaukossa, Lumienkeli foam rollilla, Rintakehän mobilisointi pallolla (kaikki MedBridge TOS -ohjeesta)
+- Takaolkapään veto kasvoille (face pull), Käänteiset vipunostot (reverse fly) — ryhti ja lapatuki
+- Lisäksi Pallof-punnerrus lisätty Vatsa/keskivartalo-kategoriaan
+
+**AI-valmentajan PROFILE päivitetty samassa versiossa** (pysyvä synkronointisääntö). Valmentaja oppi kolme asiaa:
+1. Nämä liikkeet ovat huoltoa ja aktivointia, EIVÄT progressiokohteita — valmentaja ei saa ehdottaa niihin painonlisäystä eikä analysoida niitä voimaliikkeiden tapaan
+2. Ohjelman rakenne-logiikka: aktivointi alkuun, huolto loppuun, ja miksi
+3. Nämä liikkeet ovat SUOJATTUJA — valmentaja ei saa ehdottaa niiden poistamista ajan säästämiseksi
+Lisäksi valmentajalle kerrottiin, että liikkeet perustuvat yleiseen TOS-fysioterapiaohjeeseen, ei henkilökohtaiseen määräykseen.
+
+**Ohjelma päivittyy automaattisesti.** Uusi kertaluontoinen päivitys (migraatio) lisää uudet liikkeet myös aiemmin tallennettuun treenijakoon. Ilman tätä uudet liikkeet eivät olisi näkyneet lainkaan, koska sovellus käyttää selaimeen tallennettua ohjelmaa oletuksen sijaan. Omat muokkaukset säilyvät, eikä liikkeitä lisätä kahteen kertaan.
+
+**Käyttöliittymässä:** huoltoliikkeet on merkitty violetilla "Huolto"-merkillä treenilistassa, ja kirjausnäkymässä niissä lukee ettei tavoite ole paino vaan liikkeen laatu. Näihin ei ehdoteta painonlisäystä.
+
+### B) Toistojen per-puoli-erittely
+
+- Yksipuolisissa liikkeissä kirjauksen toistosarakkeessa lukee nyt pieni vihje **"per puoli"**, ja historiassa näkyy esim. "25s/puoli" tai "20×10/puoli"
+- Tunnistetaan automaattisesti: sivulankku, lintukoira, kuollut hyönteinen, Bulgarialainen split-kyykky, askelkyykky, yhden käden käsipainosoutu, oviaukkovenytys, Pallof-punnerrus, rintakehän mobilisointi
+- Yksi luku = yhden puolen määrä. Merkintä tallennetaan myös kirjaukseen (repMode), ja valmentajan profiilissa kerrotaan miten se tulkitaan
+- Sama turvaverkko kuin painomerkinnässä: liikkeelle voi tarvittaessa asettaa koodissa kentän `repMode`, joka voittaa automatiikan
+
+### C) Joustava liikejärjestys (laite varattu -tilanne)
+
+Aiemmin liikkeet piti tehdä ohjelman järjestyksessä. Nyt:
+- Kirjausnäkymän yläreunassa on nappi **"Liike 3/7 · Ojentajapunnerrus ▾"**, joka avaa listan kaikista liikkeistä nimineen — mihin tahansa voi hypätä suoraan
+- Listassa näkyy kunkin liikkeen tila: **Nyt** (missä ollaan), **✓ Käyty** (jo tehty) tai **Siirretty** (siirretty myöhemmäksi)
+- Nappi **"Teen myöhemmin ↓"** siirtää nykyisen liikkeen jonon loppuun ja tuo heti seuraavan näkyviin. Nappi piilotetaan viimeisessä liikkeessä
+- Oma järjestys säilyy keskeytyksen yli: keskeneräisen treenin välitallennus muistaa järjestyksen, siirretyt liikkeet ja sen missä oltiin
+
+### D) Ylätalja eriytetty leuanvedosta (bugikorjaus)
+
+- **Ongelma:** liikkeen nimi oli "Ylätalja / Leuanveto". Koska nimessä luki "leuanveto", sovellus tulkitsi sen kehon paino -liikkeeksi, jolloin esim. 70 kg ylätalja näkyi väärin
+- **Korjaus:** perusohjelman liike on nyt pelkkä **"Ylätalja"** (painomerkintä "yhteensä"). Leuanveto on edelleen erikseen kirjastossa omana kehon paino -liikkeenään
+- Nimi korjataan automaattisesti myös aiemmin tallennettuun ohjelmaan
+
+### Tekniset muutokset
+
+- Uudet apufunktiot: `getRepMode`, `getRepColumnLabel`, `isMobility`, `migratePlan`, `collectDraftData`, `deferCurrentExercise`, `openJumpModal`, `closeJumpModal`
+- Kirjausnäkymän liikejärjestys erotettu ohjelman järjestyksestä (`logOrder`), lisäksi seurataan siirrettyjä ja käytyjä liikkeitä
+- `formatSets` lisää /puoli-merkinnän; `suggestNextWeight` ei enää ehdota painoa huoltoliikkeisiin
+- `isTimeBased` ja `getWeightMode` tunnistavat uudet liikkuvuusliikkeet
+- Kiinteä "Liike X/Y" -laskuri poistettu liikkeen otsikosta — se olisi näyttänyt väärää numeroa kun järjestystä muutetaan. Tieto on nyt hyppynapissa, joka päivittyy oikein
+- 120 automaattista yksikkötestiä ajettu läpi (logiikka, järjestyksen muuttaminen, migraatio, valmentajan profiilin synkronointi)
+- Muokattu: app2.js, index.html (hyppynappi, siirtymävalikko, treenijaon kuvaus, footer v3.2), style.css (uudet tyylit)
+
+### Muistutus
+
+Claude ei ole lääkäri eikä fysioterapeutti. MedBridge-ohje on yleinen TOS-fysioterapiaohje, ei JJ:lle henkilökohtaisesti määrätty. Kannattaa vahvistaa fysioterapeutilta tai lääkäriltä, että juuri nämä liikkeet sopivat — erityisesti siksi, että TOS-oireet liittyvät käsien yläasentoon.
+
+---
+
 ## v3.1 — 18.9.2026
 
 **Iso päivitys: terveysmuutokset + kirjausmerkintöjen selkeytys.** Yhdistetty kaksi kokonaisuutta (TODO-kohdat 0, 0.4, 0.5c), koska molemmat koskevat liikkeitä ja kirjaamista.
