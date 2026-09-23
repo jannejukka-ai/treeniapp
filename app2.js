@@ -18,6 +18,14 @@ const TOS_PEC_STRETCH = {
   sets: 2, reps: '30 s/puoli', weight: 0, unit: 'kg',
   note: 'HUOLTO loppuun — kyynärpää n. 120° kulmassa, kevyt venytys, älä kohota hartiaa. Ei painoa.'
 };
+// Ortopedin suora suositus (JJ kertonut 22.9.2026). TEKNIIKKA ON OLENNAINEN:
+// liikkeen tavanomainen suoritustapa (yliojennus yläasennossa) on juuri se,
+// jota pitää välttää. Siksi ohje on kirjoitettu auki.
+const BACK_EXTENSION = {
+  id: 'backext', name: 'Selän ojennus penkissä (hyperextension)',
+  sets: 2, reps: '10', weight: 0, unit: 'kg',
+  note: 'ORTOPEDIN OHJE — tuki hieman nivusia YLEMMÄS. Kehon painolla, ei lisäpainoa. Nosta selkä pyöristetystä asennosta ylös alhaalta lähtien. EI YLIOJENNUSTA yläasennossa.'
+};
 const TOS_SNOW_ANGEL = {
   id: 'snowangel', name: 'Lumienkeli foam rollilla',
   sets: 2, reps: '10', weight: 0, unit: 'kg',
@@ -44,10 +52,11 @@ const DEFAULT_PLAN = {
     exercises: [
       { ...TOS_ACTIVATION },
       { id: 'hip', name: 'Lantionnosto', sets: 3, reps: '10–12', weight: 40, unit: 'kg', note: 'Pakarat & takareidet — selkäystävällinen (selkä tuettuna)' },
-      { id: 'row', name: 'Tuettu taljasoutu istuen', sets: 3, reps: '8–10', weight: 70, unit: 'kg', note: 'Keskiselkä — rinta tuettuna, selkäystävällinen (ei kulmasoutua)' },
+      { id: 'row', name: 'Rintatuettu soutulaite', sets: 3, reps: '8–10', weight: 70, unit: 'kg', note: 'Keskiselkä — rinta tuettuna laitetta vasten, vartalo ei heilu (ei kulmasoutua)' },
       { id: 'ohp', name: 'Arnold press istuen', sets: 2, reps: '10–12', weight: 20, unit: 'kg', note: 'Olkapäät — vapaa liikerata & säädettävä kulma (TOS-ystävällinen)' },
       { id: 'curl', name: 'Vasarakääntö', sets: 2, reps: '10–12', weight: 14, unit: 'kg', note: 'Käsivarret — neutraali ranne (ei vaakakämmentä, nivelystävällinen)' },
       { id: 'splank', name: 'Sivulankku', sets: 2, reps: '20–30 s/puoli', weight: 0, unit: 'kg', note: 'Vinot vatsalihakset — tukee selkää sivusuunnassa' },
+      { ...BACK_EXTENSION },
       { ...TOS_SNOW_ANGEL },
     ]
   }
@@ -59,7 +68,38 @@ const DEFAULT_PLAN = {
 // Käyttäjän oma treenijako on tallennettu selaimen muistiin. Kun oletusohjelmaan
 // tulee terveyssyistä uusia liikkeitä, ne pitää lisätä myös tallennettuun
 // ohjelmaan — muuten ne eivät koskaan näy käyttäjälle. Tämä ajetaan kerran.
-const PLAN_MIGRATION_VERSION = 2; // 2 = v3.2 (TOS-liikkeet + Ylätalja-nimi)
+const PLAN_MIGRATION_VERSION = 3; // 3 = v3.2.1 (v3.1:n liikevaihdot + selän ojennuspenkki)
+
+// Vanhentuneet liikenimet → sovittu nimi.
+// HUOM: tunnistus tehdään NIMEN perusteella, ei id:n. Syy: liikkeen vaihto
+// sovelluksessa arpoo liikkeelle uuden id:n, joten id-pohjainen tunnistus
+// ei löytäisi liikkeitä joita käyttäjä on joskus vaihtanut käsin.
+const EXERCISE_RENAMES = [
+  {
+    match: n => /kulmasoutu|alatalja|taljasoutu/.test(n) && !/rintatuettu/.test(n),
+    name: 'Rintatuettu soutulaite',
+    note: 'Keskiselkä — rinta tuettuna laitetta vasten, vartalo ei heilu (ei kulmasoutua)',
+    reason: 'v3.1/v3.2.1: rinta tuettuna, selkäystävällinen'
+  },
+  {
+    match: n => /hartiaprässi|hartiapunnerrus|olkaprässi|pystypunnerrus/.test(n) && !/arnold/.test(n),
+    name: 'Arnold press istuen',
+    note: 'Olkapäät — vapaa liikerata & säädettävä kulma (TOS-ystävällinen)',
+    reason: 'v3.1: kiinteä laite pois, TOS-ystävällinen vapaa liikerata'
+  },
+  {
+    match: n => /hauiskääntö/.test(n) && !/vasara/.test(n),
+    name: 'Vasarakääntö',
+    note: 'Käsivarret — neutraali ranne (ei vaakakämmentä, nivelystävällinen)',
+    reason: 'v3.1: neutraali ranne, nivelystävällinen'
+  },
+  {
+    match: n => /leuanveto/.test(n) && /ylätalja/.test(n),
+    name: 'Ylätalja',
+    note: 'Yläselkä vastapainoksi — edestä tuleva veto',
+    reason: 'v3.2: painomerkintä meni väärin yhdistelmänimellä'
+  },
+];
 
 function migratePlan() {
   const saved = localStorage.getItem('plan');
@@ -71,32 +111,78 @@ function migratePlan() {
   let plan;
   try { plan = JSON.parse(saved); } catch (e) { return; }
 
+  const changes = [];
+
+  // Liikkeet jotka pitää löytyä molemmista treeneistä (alkuun / loppuun)
   const additions = {
-    A: { start: TOS_ACTIVATION, end: TOS_PEC_STRETCH },
-    B: { start: TOS_ACTIVATION, end: TOS_SNOW_ANGEL },
+    A: { start: [TOS_ACTIVATION], end: [TOS_PEC_STRETCH] },
+    B: { start: [TOS_ACTIVATION], end: [TOS_SNOW_ANGEL] },
   };
 
   ['A', 'B'].forEach(key => {
     const w = plan[key];
     if (!w || !Array.isArray(w.exercises)) return;
 
-    // D) "Ylätalja / Leuanveto" → "Ylätalja" (painomerkintä meni väärin)
+    // 1) Nimeä vanhentuneet liikkeet uudelleen (id säilyy → historia ei katkea)
     w.exercises.forEach(ex => {
-      if (ex.id === 'lat' && /leuanveto/i.test(ex.name || '')) {
-        ex.name = 'Ylätalja';
-        ex.note = 'Yläselkä vastapainoksi — edestä tuleva veto';
+      const n = (ex.name || '').toLowerCase();
+      for (const rule of EXERCISE_RENAMES) {
+        if (rule.match(n) && ex.name !== rule.name) {
+          changes.push(`${w.name || key}: "${ex.name}" → "${rule.name}" (${rule.reason})`);
+          ex.name = rule.name;
+          ex.note = rule.note;
+          break;
+        }
       }
     });
 
-    // A) Lisää TOS-aktivointi alkuun ja huoltoliike loppuun, jos puuttuvat
-    const has = id => w.exercises.some(ex => ex.id === id);
-    const add = additions[key];
-    if (add.start && !has(add.start.id)) w.exercises.unshift({ ...add.start });
-    if (add.end && !has(add.end.id)) w.exercises.push({ ...add.end });
+    // 2) Lisää puuttuvat liikkeet. Tarkistus tehdään NIMELLÄ eikä id:llä,
+    //    jotta käsin lisättyä liikettä ei tule toiseen kertaan.
+    const hasName = name => w.exercises.some(
+      ex => (ex.name || '').toLowerCase() === name.toLowerCase()
+    );
+    const add = additions[key] || { start: [], end: [] };
+    add.start.slice().reverse().forEach(t => {
+      if (!hasName(t.name)) { w.exercises.unshift({ ...t }); changes.push(`${key}: lisätty alkuun "${t.name}"`); }
+    });
+    add.end.forEach(t => {
+      if (!hasName(t.name)) { w.exercises.push({ ...t }); changes.push(`${key}: lisätty loppuun "${t.name}"`); }
+    });
   });
+
+  // 3) Selän ojennuspenkki: ortopedin suositus, kuuluu Treeni B:hen.
+  //    Jos se on jo siellä (millä tahansa id:llä), päivitetään vain ohjeteksti.
+  const wB = plan.B;
+  if (wB && Array.isArray(wB.exercises)) {
+    const existing = wB.exercises.find(ex => /selän ojennus|hyperextension|selkäpunnerrus/.test((ex.name || '').toLowerCase()));
+    if (existing) {
+      if (existing.note !== BACK_EXTENSION.note) {
+        existing.name = BACK_EXTENSION.name;
+        existing.note = BACK_EXTENSION.note;
+        changes.push('B: selän ojennuspenkkiin lisätty ortopedin tekniikkaohje');
+      }
+    } else {
+      const snowIdx = wB.exercises.findIndex(ex => (ex.name || '').toLowerCase().includes('lumienkeli'));
+      const at = snowIdx >= 0 ? snowIdx : wB.exercises.length;
+      wB.exercises.splice(at, 0, { ...BACK_EXTENSION });
+      changes.push('B: lisätty "Selän ojennus penkissä (hyperextension)"');
+    }
+  }
 
   localStorage.setItem('plan', JSON.stringify(plan));
   localStorage.setItem('planMigration', String(PLAN_MIGRATION_VERSION));
+  if (changes.length) {
+    localStorage.setItem('planMigrationLog', JSON.stringify({ version: PLAN_MIGRATION_VERSION, changes }));
+    console.log('Treeniapp: ohjelma päivitetty ajan tasalle —', changes);
+  }
+}
+
+// Palauttaa listan siitä mitä viimeisin automaattinen päivitys muutti
+function getPlanMigrationLog() {
+  try {
+    const raw = localStorage.getItem('planMigrationLog');
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) { return null; }
 }
 
 // LIIKEKIRJASTO — valmiit vaihtoehdot ryhmiteltynä.
@@ -111,12 +197,12 @@ const EXERCISE_LIBRARY = {
   ],
   'Selkä': [
     { name: 'Ylätalja leveä ote', note: 'Selkäystävällinen — edestä tuleva veto' },
+    { name: 'Rintatuettu soutulaite', note: 'Selkäystävällinen — rinta tuettuna laitetta vasten' },
     { name: 'Tuettu taljasoutu istuen', note: 'Selkäystävällinen — rinta tuettuna' },
     { name: 'Taljasoutu istuen', note: 'Selkäystävällinen' },
     { name: 'Yhden käden käsipainosoutu', note: 'Selkäystävällinen' },
     { name: 'Käsillä roikkuminen + polvennosto', note: 'Selkäystävällinen — ortopedin suosima' },
     { name: 'Leuanveto', note: 'Kehon paino' },
-    { name: 'Kulmasoutu', note: 'Varo selkää — ei tuettu' },
   ],
   'Jalat (selkäystävällinen)': [
     { name: 'Lantionnosto', note: 'Selkäystävällinen — pakarat & takareidet' },
@@ -125,18 +211,16 @@ const EXERCISE_LIBRARY = {
     { name: 'Jalkaprässi', note: 'Selkä tuettuna' },
     { name: 'Reiden ojennus (laite)', note: 'Polviystävällinen kevyellä' },
     { name: 'Reiden koukistus (laite)', note: 'Selkäystävällinen — takareidet' },
-    { name: 'Selän ojennus penkissä (hyperextension)', note: 'Selkäystävällinen — selän tukilihakset, ortopedin suosima' },
+    { name: 'Selän ojennus penkissä (hyperextension)', note: 'ORTOPEDIN OHJE: tuki nivusia ylemmäs, kehon painolla, pyöristetystä ylös — EI yliojennusta' },
   ],
-  'Jalat (varo selkää)': [
-    { name: 'Kyykky', note: 'Varo selkää' },
+  'Pohkeet': [
     { name: 'Pohjenousu', note: '' },
   ],
   'Olkapäät': [
     { name: 'Arnold press istuen', note: 'TOS-ystävällinen — vapaa liikerata & säädettävä kulma' },
-    { name: 'Käsipainohartiaprässi istuen', note: 'Selkäystävällinen' },
+    { name: 'Käsipainohartiaprässi istuen', note: 'Vapaat käsipainot ok — ei kiinteää laitetta' },
     { name: 'Vipunosto sivulle', note: 'Kevyt olkakuorma' },
     { name: 'Vipunosto eteen', note: '' },
-    { name: 'Hartiaprässi istuen (selkätuki)', note: 'Selkätuki ok — varo kulmaa (TOS)' },
   ],
   'Kädet': [
     { name: 'Vasarakääntö', note: 'Nivelystävällinen — neutraali ranne' },
@@ -205,17 +289,27 @@ Ohjelmassa on lyhyitä TOS-/ryhtiliikkeitä, jotka ovat fysioterapeuttista HUOLT
 - "Lapaluiden veto yhteen istuen" — AKTIVOINTI, molempien treenien ALUSSA
 - "Rintalihaksen venytys oviaukossa" — HUOLTO, treeni A:n LOPUSSA
 - "Lumienkeli foam rollilla" — HUOLTO, treeni B:n LOPUSSA
+- "Selän ojennus penkissä (hyperextension)" — treeni B, ORTOPEDIN SUORA SUOSITUS (ks. alla)
 (Samaan ryhmään kuuluvat myös: hartioiden pyöritykset istuen, rintakehän mobilisointi pallolla.)
+
+SELÄN OJENNUS PENKISSÄ — ORTOPEDIN ANTAMA TEKNIIKKA (älä koskaan ohjeista toisin):
+- Tuki nostetaan hieman NIVUSIA YLEMMÄS. Tämä on olennaista: jos tuki on lantion taitteen alapuolella, liike tapahtuu lonkista (pakara-/takareisiliike). Ylempänä liike siirtyy selkärankaan, ja juuri sitä tässä haetaan.
+- Liike tehdään KEHON PAINOLLA. Ei lisäpainoa koskaan.
+- Selkä nostetaan pyöristetystä asennosta ylös alhaalta lähtien, hallitusti.
+- EI YLIOJENNUSTA yläasennossa. Liike pysähtyy neutraaliin.
+- Tämä on hallittu liikkuvuusharjoite, EI voimaliike. Älä ehdota painoa, älä ehdota lisää toistoja tavoitteena kuorma.
+- Jos käyttäjä kysyy kuinka ylös liike saa jatkua (lannerangan neutraaliin vai saako rintarankaa ojentaa mukana), kerro ettet tiedä ja kehota kysymään ortopedilta — tämä on käyttäjän oma avoin kysymys, ei sinun päätettävissäsi.
 
 Säännöt näille liikkeille:
 1. EI PROGRESSIOTA. Älä koskaan ehdota painon lisäämistä tai toistojen kasvattamista näihin, äläkä analysoi niitä kuten voimaliikkeitä. Tavoite on liikkeen LAATU ja liikkuvuus, ei kuorma. Jos niissä näkyy paino 0, se on oikein.
 2. RAKENNE-LOGIIKKA: aktivointi kuuluu treenin ALKUUN, koska se herättää lapatuen ennen penkkiä ja soutua ja tekee nostoista turvallisempia. Pitkiä staattisia venytyksiä EI tehdä ennen voimaliikkeitä, koska ne voivat hetkellisesti heikentää voimantuottoa. Huoltovenytys kuuluu LOPPUUN, jolloin keho on lämmin ja venytys tehokkainta.
-3. NÄMÄ OVAT SUOJATTUJA LIIKKEITÄ. Älä koskaan ehdota niiden poistamista, lyhentämistä tai ohittamista "ajan säästämiseksi", vaikka käyttäjä ei pidä pitkistä treeneistä. Ne ovat ohjelmassa terveyssyistä ja vievät yhteensä vain muutaman minuutin.
-4. Nämä perustuvat yleiseen TOS-fysioterapiaohjeeseen (MedBridge), eivät käyttäjälle henkilökohtaisesti määrättyyn ohjelmaan. Jos käyttäjä kysyy niistä tarkemmin tai raportoi oireita niiden aikana, muistuta että fysioterapeutti tai lääkäri vahvistaa sopivuuden.
+3. EI RPE-ARVIOTA. Sovellus ei enää kysy näistä painoa eikä RPE:tä. Jos vanhoissa kirjauksissa on näille painoja tai RPE-lukuja, jätä ne huomiotta äläkä kommentoi niitä.
+4. NÄMÄ OVAT SUOJATTUJA LIIKKEITÄ. Älä koskaan ehdota niiden poistamista, lyhentämistä tai ohittamista "ajan säästämiseksi", vaikka käyttäjä ei pidä pitkistä treeneistä. Ne ovat ohjelmassa terveyssyistä ja vievät yhteensä vain muutaman minuutin.
+5. Nämä perustuvat yleiseen TOS-fysioterapiaohjeeseen (MedBridge), eivät käyttäjälle henkilökohtaisesti määrättyyn ohjelmaan. Jos käyttäjä kysyy niistä tarkemmin tai raportoi oireita niiden aikana, muistuta että fysioterapeutti tai lääkäri vahvistaa sopivuuden.
 
 PROGRESSIO: sovella hypertrofisen harjoittelun periaatteita — 2–3 treeniä/viikko, 8–12 toistoa, 2–3 sarjaa/liike. Terveys ja kivuttomuus menevät aina kuorman lisäyksen edelle. Progressio koskee VAIN voimaliikkeitä, ei yllä mainittuja huoltoliikkeitä.
 Treenifrekvenssi: 2 kertaa viikossa (realistinen tavoite).
-Treenijako: A (Yläkroppa työntö + Etujalat) ja B (Yläkroppa veto + Takajalat) vuorotellen. Rakenne molemmissa: lapatuen aktivointi alussa → voimaliikkeet → keskivartaloliike (lankku/sivulankku) → huoltoliike lopussa.
+Treenijako: A (Yläkroppa työntö + Etujalat) ja B (Yläkroppa veto + Takajalat) vuorotellen. Rakenne molemmissa: lapatuen aktivointi alussa → voimaliikkeet → keskivartaloliike (lankku/sivulankku) → huoltoliike lopussa. Treeni B:ssä lisäksi selän ojennus penkissä ennen loppuhuoltoa (ortopedin suositus).
 
 MERKINNÄT KIRJAUKSISSA:
 - Lankut ja sivulankut mitataan sekunneissa, ei painossa. Näissä progressio = pidempi kesto, ei lisäpaino.
@@ -421,7 +515,9 @@ function isTimeBased(exerciseId, exerciseName) {
 // HUOLTO- JA AKTIVOINTILIIKKEET (v3.2)
 // ============================================================
 // Näitä ei progressoida painolla eikä niille ehdoteta painonlisäystä.
-const MOBILITY_KEYWORDS = ['lapaluiden veto', 'venytys', 'lumienkeli', 'mobilisointi', 'pyöritykset'];
+const MOBILITY_KEYWORDS = ['lapaluiden veto', 'venytys', 'lumienkeli', 'mobilisointi', 'pyöritykset',
+  // v3.2.1: selän ojennuspenkki on liikkuvuusharjoite, ei voimaliike (ortopedin ohje)
+  'selän ojennus', 'selanojennus', 'hyperextension', 'selkäpunnerrus'];
 
 function isMobility(exerciseName) {
   if (!exerciseName) return false;
@@ -472,7 +568,9 @@ function getWeightMode(ex) {
   // yleensä "punnerrus" yksinään — käsitellään erillisellä tarkalla säännöllä.
   const bodyweightKeywords = ['leuanveto', 'dippi', 'dippaus', 'roikku', 'polvennosto', 'polvien nosto', 'lankku', 'lankutus', 'lintukoira', 'hyönteinen', 'vuoristokiipeilijä', 'vatsarutistus',
     // v3.2: liikkuvuus- ja huoltoliikkeet — ei painoa
-    'lapaluiden veto', 'venytys', 'lumienkeli', 'mobilisointi', 'pyöritykset'];
+    'lapaluiden veto', 'venytys', 'lumienkeli', 'mobilisointi', 'pyöritykset',
+    // v3.2.1
+    'selän ojennus', 'selanojennus', 'hyperextension', 'selkäpunnerrus'];
   if (bodyweightKeywords.some(k => name.includes(k))) {
     return 'kehon-paino';
   }
@@ -540,11 +638,15 @@ function formatSets(sets, exOrId) {
   const mode = getWeightMode(ex);
   // v3.2: yksipuolisissa liikkeissä luku tarkoittaa yhtä puolta
   const sideSuffix = getRepMode(ex) === 'per-puoli' ? '/puoli' : '';
+  // v3.2.1: huoltoliikkeissä ei painoa — näytä pelkkä toisto- tai sekuntimäärä
+  const mobility = isMobility(ex.name);
 
   return sets.map(s => {
     let str;
     const w = s.weight || 0;
-    if (timeBased) {
+    if (mobility) {
+      str = (s.reps || 0) + (timeBased ? 's' : '') + sideSuffix;
+    } else if (timeBased) {
       // Aikaperustainen: näytä sekunnit (reps-kenttä sisältää sekunnit)
       str = (s.reps || 0) + 's' + sideSuffix;
       if (w > 0) str += ' +' + w + 'kg'; // painotettu lankku
@@ -809,7 +911,7 @@ function openLogModalWithData(draftData) {
     }
 
     const div = document.createElement('div');
-    div.className = 'log-exercise log-step';
+    div.className = 'log-exercise log-step' + (isMobility(ex.name) ? ' is-mobility' : '');
     div.dataset.exId = ex.id;
     div.dataset.exName = ex.name;
     div.dataset.stepIndex = exIndex;
@@ -827,14 +929,14 @@ function openLogModalWithData(draftData) {
     div.innerHTML = `
       <div class="log-ex-name">${ex.name}</div>
       <div class="log-ex-target">Tavoite: ${ex.reps}${(ex.weight > 0 && !isTimeBased(ex.id, ex.name)) ? ' @ ' + suggestedWeight + ' kg (raskain sarja)' : ''}</div>
-      ${isMobility(ex.name) ? '<div class="log-care-note">Huolto-/aktivointiliike — tavoite on liikkeen laatu, ei paino. Ei progressiota.</div>' : ''}
+      ${isMobility(ex.name) ? '<div class="log-care-note">Huolto-/liikkuvuusliike — kirjaa vain toistot tai sekunnit. Ei painoa, ei RPE:tä, ei progressiota.</div>' : ''}
       ${lastTimeHtml}
       ${exIndex === mainIdx ? '<div class="rpe-hint">RPE = kuinka raskas sarja oli (1–10). 10 = maksimi, 8 = 2 toistoa jäi varaan. Vapaaehtoinen.</div>' : ''}
       <div class="sets-header">
         <span class="sets-col-label">Sarja</span>
         <span class="sets-col-label">${getRepColumnLabel(ex)}</span>
-        <span class="sets-col-label">Paino (kg)<span class="col-hint">${isTimeBased(ex.id, ex.name) ? 'tyhjä = ei lisäpainoa' : getWeightModeHint(ex)}</span></span>
-        <span class="sets-col-label">RPE</span>
+        <span class="sets-col-label sets-col-weight">Paino (kg)<span class="col-hint">${isTimeBased(ex.id, ex.name) ? 'tyhjä = ei lisäpainoa' : getWeightModeHint(ex)}</span></span>
+        <span class="sets-col-label sets-col-rpe">RPE</span>
       </div>
       <div class="sets-container" id="sets-${ex.id}"></div>
       <div class="sets-buttons">
