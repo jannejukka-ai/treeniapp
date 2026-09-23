@@ -3,7 +3,7 @@
 Tähän tiedostoon on kirjattu tulevia ominaisuuksia ja kehityskohteita joita ei ole vielä toteutettu.
 Kun jokin kohta rakennetaan, se siirretään CHANGELOG-tiedostoon valmiina versiona.
 
-**MUISTA jokaisessa versiopäivityksessä:** päivitä versionumero myös index.html:n footeriin (teksti "Treeniapp v3.2"). Se ei päivity automaattisesti.
+**MUISTA jokaisessa versiopäivityksessä:** päivitä versionumero myös index.html:n footeriin (teksti "Treeniapp v3.2.1"). Se ei päivity automaattisesti.
 
 **⚠️ PYSYVÄ SÄÄNTÖ — AI-VALMENTAJAN SYNKRONOINTI:** Aina kun muutetaan liikkeitä, treenijakoa, tavoitteita, rajoitteita tai kirjauslogiikkaa, TARKISTA JA PÄIVITÄ SAMASSA YHTEYDESSÄ myös AI-valmentajan tiedot (PROFILE-teksti app2.js:ssä, ja tarvittaessa buildCoachContext / analyzeSession-promptit). Syy: jos valmentajan tiedot jäävät jälkeen, JJ:llä on puutteellisin tiedoin varustettu valmentaja joka voi antaa ohjelman vastaisia tai jopa terveydelle haitallisia neuvoja. Valmentaja ja sovelluksen todellisuus EIVÄT saa erkaantua. Tämä koskee erityisesti: uudet/poistetut liikkeet, muuttuneet rajoitteet, uudet aikaperustaiset tai kehon paino -liikkeet, tavoitemuutokset.
 
@@ -34,6 +34,27 @@ Katso tarkemmat tiedot CHANGELOG:sta v3.1.
 
 ---
 
+## VALMIS ✅ — v3.2.1: korjausversio (toteutettu 22.9.2026)
+
+JJ:n salilla tekemät havainnot korjattu. Tärkein oli juurisyy, joka oli jäänyt v3.2:ssa vain puoliksi korjatuksi.
+
+- ✅ **v3.1:n liikevaihdot eivät olleet koskaan tulleet JJ:n puhelimeen.** Kulmasoutu/alataljaveto, hartiaprässi ja hauiskääntö olivat yhä käytössä. Korjattu nimipohjaisella migraatiolla (EXERCISE_RENAMES).
+- ✅ **Migraatio tunnistaa liikkeet NIMESTÄ, ei id:stä.** Syy: `applySwap` arpoo vaihdetulle liikkeelle uuden id:n, joten id-pohjainen tunnistus ei löydä käsin vaihdettuja liikkeitä. Tämä on tärkeä oppi jatkoon.
+- ✅ **Huoltoliikkeissä ei enää paino- eikä RPE-saraketta.** Historiassa pelkkä määrä.
+- ✅ **Selkäpunnerruspenkki tunnistetaan huoltoliikkeeksi** — tämä oli syy siihen että valmentaja kommentoi siihen painoprogressiota.
+- ✅ **Ortopedin tekniikkaohje selän ojennuspenkkiin** ohjetekstiin ja valmentajan profiiliin.
+- ✅ **Soutuliike → Rintatuettu soutulaite** (JJ kokeili, sopi paremmin).
+- ✅ **Kirjasto siivottu:** kyykky, kulmasoutu ja kiinteä hartiaprässi poistettu (profiili kielsi ne jo).
+- ✅ Migraatio kirjaa muutokset lokiin (`getPlanMigrationLog`).
+
+173 yksikkötestiä läpi, mukaan lukien JJ:n todellinen tallennettu ohjelma ajettuna päivityksen läpi.
+
+**⬜ AVOIN — sivulankku puuttuu Treeni B:stä.** Se on jossain vaiheessa vaihdettu selkäpunnerruspenkkiin. Migraatio ei palauta sitä automaattisesti (poisto on voinut olla tarkoituksellinen). Kysy JJ:ltä: palautetaanko sivulankku, vai riittääkö lankku Treeni A:ssa?
+
+**⬜ PYSYVÄ SÄÄNTÖ (opittu v3.2.1:ssä):** aina kun DEFAULT_PLANin liikkeen NIMI muuttuu, lisää vanha nimi `EXERCISE_RENAMES`-taulukkoon ja nosta `PLAN_MIGRATION_VERSION`-lukua. Pelkkä DEFAULT_PLANin muuttaminen ei riitä — muutos ei tule käyttäjän puhelimeen.
+
+---
+
 ## VALMIS ✅ — v3.2: TOS/ryhtiliikkeet vakio-ohjelmaan + käytettävyys (toteutettu 22.9.2026)
 
 Toteutettu koko v3.2-jono, kohdat **A, B, C ja D**. Tiivistetysti:
@@ -58,7 +79,7 @@ Toteutettu koko v3.2-jono, kohdat **A, B, C ja D**. Tiivistetysti:
 
 **Konteksti:** JJ:n viimeisimmässä ortopedin käyntitekstissä: *"Nostojen myötä tullut varsin hankalaksi yltynyt kummankin kyljen ja ylävatsan kipuoire. TT-kuvissa TH VIII–IX–X alueessa fyyttinokkia, lähes siltaavaa luutumista edessä. Foraminat kaventuneet. Jatkossa harjoittelussa tulisi huomioida nämä ja korvata perinteisiä harjoitteita modifioiduilla kuormituksilla."*
 
-**A) SELÄN OJENNUS PENKISSÄ — tekniikka on ortopedin antama ja se PUUTTUU koodista.**
+**A) ✅ TEHTY v3.2.1:ssä — SELÄN OJENNUS PENKISSÄ, ortopedin tekniikkaohje viety koodiin** (ohjeteksti + valmentajan profiili + huoltoliiketunnistus + oletusohjelma). Alkuperäinen kuvaus säilytetty alla referenssiksi.
 Nykytila: liike on kirjastossa merkinnällä "ortopedin suosima", mutta ilman tekniikkaohjetta. Tämä on riski, koska liikkeen TAVANOMAINEN suoritustapa (yliojennus yläasennossa) on juuri se jota pitää välttää. Pelkkä "ortopedin suosima" voi johtaa väärään suoritukseen.
 
 Ortopedin ohje sellaisena kuin JJ sen kertoi:
