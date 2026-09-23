@@ -5,6 +5,79 @@ Uusin versio on aina ylimpänä.
 
 ---
 
+## v3.2.1 — 22.9.2026
+
+**Korjausversio.** JJ havaitsi salilla treenin aikana neljä asiaa, ja niistä paljastui yksi laajempi juurisyy. Kaikki korjattu.
+
+### Juurisyy: v3.1:n liikevaihdot eivät koskaan tulleet perille
+
+v3.1 vaihtoi Treeni B:hen kolme liikettä terveyssyistä. Muutokset tehtiin `DEFAULT_PLAN`-oletukseen, mutta koska sovellus lukee treenijaon selaimen muistista, **JJ:n puhelimessa näkyivät yhä vanhat liikkeet**. Hän on siis treenannut niitä siitä asti — kaksi niistä (kulmasoutu, tavallinen hauiskääntö) on nimenomaan merkitty kirjastossa varoituksella.
+
+Sama juurisyy löydettiin ja korjattiin jo v3.2:ssa, mutta korjaus tehtiin liian kapeasti: se kattoi vain uudet TOS-liikkeet ja Ylätaljan nimen, ei v3.1:n liikevaihtoja.
+
+**Nyt korjattu pysyvästi.** Ohjelman automaattinen päivitys tunnistaa liikkeet **nimen** perusteella, ei id:n. Tämä on olennaista, koska liikkeen vaihtaminen sovelluksessa arpoo liikkeelle uuden satunnaisen id:n — id-pohjainen tunnistus ei olisi löytänyt käsin vaihdettuja liikkeitä lainkaan.
+
+Automaattisesti korjattavat vanhentuneet nimet:
+- Kulmasoutu / Alataljaveto / Taljasoutu istuen → **Rintatuettu soutulaite**
+- Hartiaprässi / Pystypunnerrus / Olkaprässi → **Arnold press istuen**
+- Hauiskääntö → **Vasarakääntö**
+- Ylätalja / Leuanveto → **Ylätalja**
+
+Liikkeen id säilyy nimenvaihdossa, joten painohistoria ei katkea. Jo oikein oleva nimi jätetään rauhaan. Päivitys kirjaa tekemänsä muutokset lokiin (`getPlanMigrationLog`).
+
+### Huoltoliikkeissä ei enää painoa eikä RPE:tä
+
+JJ:n havainto: venytys- ja liikkuvuusliikkeissä näkyi paino- ja RPE-kenttä, vaikka niissä ei ole kumpaakaan. Valmentaja myös kommentoi painoprogressiota selkäpunnerruspenkistä.
+
+- Kirjausnäkymässä huoltoliikkeissä näkyy nyt **vain sarja ja toistot/sekunnit**. Paino- ja RPE-sarake piilotettu kokonaan.
+- Historiassa huoltoliike näkyy pelkkänä määränä ("10", "30s/puoli") — ei enää harhaanjohtavaa "kehon paino × 10".
+- Huoltoliiketunnistus laajennettu: mukaan **selän ojennus penkissä / hyperextension / selkäpunnerruspenkki**. Tämä oli syy siihen, miksi valmentaja kohteli liikettä voimaliikkeenä.
+- Valmentajan profiiliin lisätty: näissä liikkeissä ei ole RPE:tä, eikä vanhoja painomerkintöjä pidä kommentoida.
+
+### Selän ojennus penkissä — ortopedin tekniikkaohje koodiin
+
+Liike oli kirjastossa merkinnällä "ortopedin suosima" mutta **ilman tekniikkaohjetta**. Tämä oli riski: liikkeen tavanomainen suoritustapa (yliojennus yläasennossa) on juuri se, jota JJ:n tulisi välttää.
+
+Ortopedin ohje kirjattu nyt sekä liikkeen ohjetekstiin että valmentajan profiiliin:
+- Tuki nostetaan hieman **nivusia ylemmäs** (ei lantion taitteen alle)
+- **Kehon painolla**, ei lisäpainoa
+- Selkä nostetaan pyöristetystä asennosta ylös alhaalta lähtien
+- **Ei yliojennusta** yläasennossa
+
+Valmentajan profiiliin lisätty myös selitys siitä, miksi tuen korkeus ratkaisee: tuki lantion taitteen alapuolella → liike tapahtuu lonkista; ylempänä → liike siirtyy selkärankaan. Lisäksi ohje: jos JJ kysyy kuinka ylös liike saa jatkua, valmentaja ei arvaa vaan ohjaa kysymään ortopedilta.
+
+Liike lisätty myös oletusohjelmaan (Treeni B, ennen loppuhuoltoa).
+
+### Soutuliike: Rintatuettu soutulaite
+
+JJ kokeili rintatuettua soutulaitetta ja piti siitä. Mekaanisesti sama idea kuin sovittu tuettu taljasoutu, mutta tukevampi — rinta lepää tyynyä vasten eikä vartalo pääse heilumaan. Vaihdettu oletusohjelmaan ja lisätty kirjastoon. Tuettu taljasoutu istuen säilyy kirjastossa vaihtoehtona.
+
+### Liikekirjasto siivottu
+
+Kirjastossa oli liikkeitä, jotka valmentajan profiili kieltää. Sovellus siis tarjosi liikettä, jonka se itse muualla kielsi.
+
+- **Poistettu:** Kyykky, Kulmasoutu, Hartiaprässi istuen (selkätuki)
+- Kategoria "Jalat (varo selkää)" poistettu; Pohjenousu siirretty uuteen "Pohkeet"-kategoriaan
+- Käsipainohartiaprässin merkintä täsmennetty: vapaat käsipainot ovat ok, kiinteä laite ei
+
+### Tekniset muutokset
+
+- `migratePlan` uudistettu: nimipohjainen tunnistus, muutosloki, `PLAN_MIGRATION_VERSION` 2 → 3
+- Uusi taulukko `EXERCISE_RENAMES` — vanhentuneet nimet yhdessä paikassa, helppo laajentaa
+- Uusi funktio `getPlanMigrationLog`
+- Uusi vakio `BACK_EXTENSION` (selän ojennus penkissä ortopedin ohjeineen)
+- `MOBILITY_KEYWORDS` ja kehon paino -avainsanat laajennettu
+- `formatSets` näyttää huoltoliikkeet ilman painoa
+- Kirjausnäkymän askel saa luokan `is-mobility`; CSS piilottaa paino- ja RPE-sarakkeen
+- 173 automaattista yksikkötestiä läpi, mukaan lukien JJ:n todellinen tallennettu ohjelma ajettuna päivityksen läpi
+- Muokattu: app2.js, index.html (treenijaon kuvaus, footer v3.2.1), style.css
+
+### Avoin kohta
+
+Sivulankku puuttuu JJ:n Treeni B:stä — se on jossain vaiheessa vaihdettu selkäpunnerruspenkkiin. Päivitys **ei** palauta sitä automaattisesti, koska poisto on voinut olla tarkoituksellinen. Päätetään erikseen.
+
+---
+
 ## v3.2 — 22.9.2026
 
 **TOS- ja ryhtiliikkeet vakio-ohjelmaan + kolme käytettävyysparannusta.** Toteutettu TODO:n v3.2-jono kokonaisuudessaan (kohdat A–D).
